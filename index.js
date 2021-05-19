@@ -18,7 +18,6 @@ const app = express();
 var validator = require('validator');
 const User = require("./models/user");
 const multer = require("multer");
-const Product = require("./models/product");
 const fs = require("fs");
 
 const deleteFile = filePath => {
