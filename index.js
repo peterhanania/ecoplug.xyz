@@ -55,7 +55,9 @@ app.use(
         callback(null, "images");
       },
       filename: (req, file, callback) => {
-        callback(null, new Date().toISOString() + "-" + file.originalname);
+       
+
+        callback(null, new Date().toISOString() + file.originalname);
       }
     }),
     fileFilter: (req, file, callback) => {
@@ -100,7 +102,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
  };
 
  const checkAuth = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
+  if (req.user) return next();
   req.session.backURL = req.url;
   res.redirect("/login");
  }
@@ -138,6 +140,46 @@ app.use(async (req, res, next) => {
 
      renderTemplate(res, req, "auth/login.ejs",{
      alert: tag === "authenticated" ? "Thank you for signing up! Please login below." : null,
+    });
+
+ });
+
+
+
+ app.get("/profile", checkAuth, (req, res, next) => {
+     
+     renderTemplate(res, req, "user/profile.ejs",{
+     alert: null,
+    });
+
+ });
+
+
+ app.post("/profile/change_profile_picture", checkAuth, async(req, res, next) => {
+     
+   
+     const user = await User.findOne({
+       email: req.user.email
+     });
+    
+     if(user){
+       
+
+       if(req.file.path){
+         if(user.profile.image){
+         await deleteFile(user.profile.image)
+         };
+         user.profile.image = req.file.path;
+         await user.save();
+        };
+      
+     };
+
+
+    
+
+     renderTemplate(res, req, "user/profile.ejs",{
+     alert: null,
     });
 
  });
@@ -212,7 +254,8 @@ app.post(
     const user = new User({
       email: email,
       password: hashedPassword,
-      username: username
+      username: username,
+      joinedAt: Date.now()
     });
     await user.save();
 

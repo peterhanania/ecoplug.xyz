@@ -15,6 +15,18 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
+  joinedAt:{
+    type: Date,
+    required: false
+  },
+  profile: {
+
+    image: {
+    type: String,
+    default: null
+    }
+
+  },
   resetToken: String,
   resetTokenExpiration: Date,
 });

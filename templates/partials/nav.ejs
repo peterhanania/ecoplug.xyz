@@ -15,8 +15,8 @@
  <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/" target="_blank" rel="noopener">Products</a></li>
  <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/" target="_blank" rel="noopener">About</a></li>
 <% if(user) { %>
-<% if (user.avatar) {
-avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png?size=128"
+<% if (user.profile.image) {
+avatar = `/${user.profile.image}`
 } else {
  avatar = "/images/unknown_user.png";
 }
@@ -30,7 +30,6 @@ avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + "
  <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg> Home</a></span>
 <% } else if (path !== "/") { %>
  <span><a class="dropdown-li" href="https://<%= hostname %>/"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg> Home</a></span>
- <span><a class="dropdown-li" href="https://<%= hostname %>/dashboard"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> My Servers</a></span>
 <% } else { %>
  <span><a class="dropdown-li" href="https://<%= hostname %>/profile"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> My Profile</a></span>
 <% } %>

@@ -30,6 +30,13 @@
 
     });
 
+   $('input').keydown(function(e) {
+    if (e.keyCode == 32) {
+        return false;
+    }
+   });
+
+
    async function signUp(){
 
         const loader = document.getElementById("loader");

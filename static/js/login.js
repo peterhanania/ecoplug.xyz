@@ -6,6 +6,7 @@
         } else return;
 
     });
+    
 
     const passInput = document.getElementById("password");
     passInput.addEventListener("keyup", async (event) => { 
@@ -14,7 +15,13 @@
         } else return;
 
     });
-
+    
+    $('input').keydown(function(e) {
+    if (e.keyCode == 32) {
+        return false;
+    }   
+    });
+    
    async function login(){
 
         const loader = document.getElementById("loader");

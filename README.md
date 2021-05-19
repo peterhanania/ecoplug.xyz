@@ -1,2 +1,2 @@
 # ecoplug.xyz
-An ideal site that helps others assist their products that benefit the environment.
+An ideal site that helps others promote their products that benefit the environment.
