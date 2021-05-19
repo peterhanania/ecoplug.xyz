@@ -90,7 +90,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
    hostname: hostname,
    pathname: pathname,
    path: req.path,
-   user: req.isLoggedIn ? req.user : null,
+   user: req.user ? req.user : null,
    url: res,
    req: req,
   };
@@ -382,13 +382,13 @@ req.session.destroy(err => {
 
   app.get("/products", async(req, res) => {
   
-  return res.redirect('in the making.')
+  return res.send('The current feature is under development!')
   
   });
 
 
    app.post("/products", async(req, res) => {
-  return res.redirect('in the making.')
+   return res.send('The current feature is under development!')
 
  });
 
