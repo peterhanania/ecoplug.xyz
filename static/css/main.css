@@ -1,0 +1,370 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap');
+
+ *, *::before, *::after {
+	 margin: 0;
+	 padding: 0;
+	 box-sizing: inherit;
+}
+ html {
+	 box-sizing: border-box;
+}
+
+.home-top{
+background: url('./home/banner.png') no-repeat 100% 100%;
+background-size: cover;
+background-image: linear-gradient(to bottom right, #bc2bff, #7249fb);
+background-color: #4f37ac;
+position: relative;
+}
+
+.home {
+padding-top: 10px;
+padding-left: 3%;
+padding-right: 3%;
+}
+
+.home-final {
+padding-top: 10px;
+padding-left: 10%;
+padding-right: 10%;
+}
+
+#new-bots-color{
+background: #2f2f2f;
+border-radius: 5px;
+}
+
+#home-text{
+background: #383737;
+}
+
+#home-image{
+border-radius: 50%;
+width: 30px;
+height: 30px;
+float: left;
+}
+
+
+.home-top .wave {
+  position: absolute;
+  width: 100%;
+  height: 140px;
+  bottom: 0;
+  left: 0;
+  background: url("https://test.urosd8sdjadaids.repl.co//home/black.svg");
+  animation: waves 10s linear infinite;
+}
+
+ 
+.home-top .wave:before {
+  content:'';
+  width: 100%;
+  height: 140px;
+  background: url("https://test.urosd8sdjadaids.repl.co//home/black.svg");
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.1;
+  animation: waves-reverse 10s linear infinite;
+}
+
+.search-title {
+color: #fff;
+
+}
+
+.bot-box{
+padding-top: 8%;
+padding-left: 7%;
+padding-right: 6%;
+padding-bottom: 5%;
+border-radius: 10px;
+width: 100%;
+height: 100%;
+}
+.bot-box .box{
+width: 100%;
+height: 100%;
+background-color: #2f2f2f;
+}
+
+.bot-box .box .block{
+display: flex;
+}
+
+.bot-box .box .block .left-block{
+width: 75%;
+height: 100%;
+}
+
+
+.bot-box .box .block .right-block{
+float: right;
+width: 20%;
+height: 100%;
+margin-left: 10px;
+}
+
+.bot-span span {
+padding-left: 10%;
+padding-top: 10px
+}
+
+.bot-span span {
+  width: 100%; 
+  display: block;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.bot-box .box .block .right-block .owner{
+vertical-align: center;
+color: #fff;
+padding-left: 10%;
+}
+
+.bot-box .box .block .right-block .information{
+font-size: 14px;
+color: #fff;
+padding-left: 10%;
+}
+
+button:focus { outline: none !important;
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0) !important;}
+
+.bot-box .box .block .right-block .order {
+text-align: center;
+color: #fff;
+}
+
+.bot-box .box .block .right-block .order button {
+  display: inline-block;
+  font-family: Whitney, "Open Sans", Helvetica, sans-serif;
+  font-weight: 400;
+  font-size: 11pt;
+  border-radius: 3px;
+  cursor: pointer;
+  height: 45px;
+  width: 100%;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2);
+  background-color: #43b581;
+  border: 2px solid #43b581;
+  color: #fff;
+}
+
+
+
+.bot-box .box h1 {
+  font-size: 38px;
+  font-family: 'Raleway', sans-serif;
+}
+
+.bot-box .box .img {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  margin-right: 20px;
+  vertical-align: middle;
+  float: left;
+}
+
+.bot-box .box .align{
+ display: flex;
+ background-color: #222222;
+ padding-left: 10px;
+ padding-right: 10px;
+ padding-bottom: 20px;
+ padding-top: 10px;
+ border-radius: 10px;
+}
+.bot-box .box .align-right{
+ background-color: #222222;
+ padding-left: 10px;
+ padding-right: 10px;
+ padding-bottom: 20px;
+ padding-top: 10px;
+ border-radius: 10px;
+}
+.bot-box .box .align .left{
+width: 100%;
+height: 100%;
+display: inline-block;
+}
+
+.bot-box .box .align .right{
+float: right;
+width: 100%;
+height: 100%;
+}
+
+.bot-box .box .align-description{
+ display: flex;
+ background-color: #222222;
+ padding-right: 10px;
+ padding-bottom: 10px;
+ padding-top: 10px;
+ border-radius: 10px;
+
+}
+@media only screen and (max-device-width : 1078px) {
+
+.bot-box {
+    padding-top: 10%;
+    padding-left: 4%;
+    padding-right: 3%;
+    padding-bottom: 5%;
+    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+}
+.bot-box .box .block .right-block{
+float: right;
+width: 20%;
+height: 100%;
+margin-left: 0pc;
+}
+
+.bot-box .box .block .left-block{
+width: 100% !important;
+height: 100%;
+float: none;
+padding-bottom: 20px;
+}
+
+.bot-box .box .block .right-block .owner{
+vertical-align: center;
+color: #fff;
+padding-left: 4%;
+}
+
+.bot-box .box .block .right-block .information{
+font-size: 14px;
+color: #fff;
+padding-left: 4%;
+}
+.bot-box .box .block .right-block{
+width: 100% !important;
+float: none !important;
+height: 100%;
+}
+
+.bot-box .box .block{
+display: block;
+}
+
+}
+
+
+.bot-box .box .align-description .side{
+border-radius: 3px 0 0 3px;
+width: 8px;
+background: #4f545c;
+}
+
+.bot-box .box .align-description .description{
+display: flex;
+padding-left: 10px;
+}
+
+
+
+.searchDiv {
+  padding-top: 240px;
+  padding-bottom: 300px;
+  width: 100%;
+  padding-left: 30%;
+  padding-right: 30%;
+  align-items: center;
+}
+/* =Responsive Structure
+----------------------------------------------- */
+@media (max-width: 800px) {
+   .searchDiv {
+  padding-left: 30%;
+  padding-right: 30%;
+}
+}
+@media (max-width: 650px) {
+  .searchDiv {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+
+}
+@media (max-width: 450px) {
+ .searchDiv {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+ 
+}
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+    .searchDiv {
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+}
+.searchDiv .icon{
+display: flex;
+}
+#searchQueryInput {
+  width: 100%;
+  height: 2.8rem;
+  background: #f5f5f5;
+  outline: none;
+  border: none;
+  border-radius: 1.625rem;
+  padding: 0 3.5rem 0 1.5rem;
+  font-size: 1rem;
+}
+
+#searchQuerySubmit {
+  width: 3.5rem;
+  height: 2.8rem;
+  margin-left: -3.5rem;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+#searchQuerySubmit:hover {
+  cursor: pointer;
+}
+.home-top .wave:after {
+  content:'';
+  width: 100%;
+  height: 140px;
+  background: url("./home/black.svg");
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.1;
+  animation-delay: -5s;
+  animation: waves 20s linear infinite;
+}
+
+
+@keyframes waves {
+  0% {
+    background-position: 0;
+  }
+  100% {
+    background-position: 1600px;
+  }
+}
+
+@keyframes waves-reverse {
+  0% {
+    background-position: 1600px;
+  }
+  100% {
+    background-position: 0;
+  }
+}

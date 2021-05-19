@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %></title>
+<link rel="stylesheet" type="text/css" href="https://<%= hostname %>/css/style.css">
+<%- include("./seo", { user, path, title, url }) %>
+</head>
+
+ <body>
+ <script type="text/javascript">var preload = document.createElement('div'); preload.className = "preloader"; preload.innerHTML = '</div><div class="loader"><div class="load-text"><div class="loaded-text">Ecoplug</div><div class="loading-text" style="color: red">.org</div></div></div>'; document.body.appendChild(preload); window.addEventListener('load', function() { preload.className +=  ' fade'; setTimeout(function(){ preload.style.display = 'none'; },500); })</script> 
+<noscript><div class="no-js">To view the page please enable javascript in your browser.</div></noscript>
+<%- include("./nav", {  user, path, url,  }) %>
+<div class="blur" id="body-blur"></div>
+<%- title === "Dashboard" ? "" : "" %> 
