@@ -317,7 +317,7 @@ app.post(
     const user = await User.findOne({ email: email });
     if (!user) {
       return renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `An invalid email or password was provided.`,
+     alert: `An invalid email was provided.`,
     });
     }
      crypto.randomBytes(32, async (err, buffer) => {
