@@ -134,7 +134,6 @@ iframe {
 	font-size: 12px;
 }
 .profile-container {
-	z-index: 1;
 	width: 100%;
 	display: flex;
 	padding: 15px;
