@@ -1,0 +1,60 @@
+
+<%- include("../partials/head", { user, path, title: "Ecoplug - new Password",  url}) %>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+	<link href="/css/auth.css" rel="stylesheet">
+	<link href="/css/tailwind.css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+<body>
+	<div class="home-top">
+   <div id="loader"><div class="lds-facebook"><div></div><div></div><div></div></div></div>
+		<form action="/new-password" id="form" method="post" name="form">
+			<div class="auth">
+	<div class="auth-box">
+            <div class="wrap-auth">  
+            <% if (userId && passwordToken) { %>
+                    <input style="display: none" name="userId" value="<%= userId %>" />
+                     <input style="display: none" name="passwordToken" value="<%= passwordToken %>" />
+                    <% if(alert) { %><div class="alert-validate"><%= alert %></div><% } %>
+                    <span class="auth-form-title">Enter Your new Password!</span>
+            
+                    <div class="wrap-input rs1-wrap-input">
+                        <input maxlength="32" class="input" id="password" type="password" name="password" placeholder="new Password" required/>
+                        <span class="input-line"></span>
+                    </div>
+                  
+                    <div class="auth-box-form-btn">
+                        <button id="button" type="button" onclick="submit()">Submit</button>
+                    </div>
+                
+             <% } %>
+            </div>
+			</div>
+		</form>
+    	<div class="wave"></div>
+	</div>
+	<div style="padding-top: 20px"></div>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'>
+	</script> 
+	<script src='/js/main.js'></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+  AOS.init();
+</script>
+</body>
+
+<%- include("../partials/footer.ejs") %>
+
+<script>
+function submit(){
+
+        const loader = document.getElementById("loader");
+        loader.style.display = "block";
+
+        const form = document.getElementById("form");
+        form.style.display = "none";
+      
+         setTimeout(()=>{document.getElementById("form").submit();}, 2000) 
+}
+</script>

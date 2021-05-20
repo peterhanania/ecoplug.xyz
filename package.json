@@ -42,6 +42,7 @@
     "hastebin": "^0.2.1",
     "i": "^0.3.6",
     "jimp": "^0.16.1",
+    "mailersend": "^1.0.2",
     "mal-scraper": "^2.11.2",
     "math-expression-evaluator": "^1.2.22",
     "memorystore": "^1.6.2",

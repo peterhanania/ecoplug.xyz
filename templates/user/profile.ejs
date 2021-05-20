@@ -16,6 +16,7 @@
 	</div>
 	<div class="profile-container">
 		<div class="wrap-container">
+     <% if(alert) { %><div class="alert-validate"><%= alert %></div><% } %>
 			<form action="/profile/change_profile_picture" class="contact-form validate-form" enctype="multipart/form-data" id="form" method="post" name="form" role="form">
 				<div class="main_profile">
 					<label><input id="image" name="image" onchange="changeImage()" style="display: none;" type="file"><img class="image" id="image" src="/images/unknown_user.png"></label>
@@ -53,7 +54,9 @@
 									<p class="list-title">Receive News and Updates</p>
 								</div>
 								<div class="notification-toggle">
-									<input class="tgl tgl-ios" id="jg1" type="checkbox"> <label class="tgl-btn" for="jg1"></label>
+                  <% if(user.profile.settings.news_and_updates) { %>
+									<input onchange="notifications()" class="tgl tgl-ios" id="jg1" type="checkbox" checked> <% } else { %><input onchange="notifications()" class="tgl tgl-ios" id="jg1" type="checkbox"> 
+                  <% } %><label class="tgl-btn" for="jg1"></label>
 								</div>
 							</li>
 							<li>
@@ -61,7 +64,9 @@
 									<p class="list-title">Receive Product Updates</p>
 								</div>
 								<div class="notification-toggle">
-									<input class="tgl tgl-ios" id="jg2" type="checkbox"> <label class="tgl-btn" for="jg2"></label>
+                  <% if(user.profile.settings.product_updates) { %>
+									<input onchange="notifications()" class="tgl tgl-ios" id="jg2" type="checkbox" checked> <% } else { %><input onchange="notifications()" class="tgl tgl-ios" id="jg2" type="checkbox"> 
+                  <% } %><label class="tgl-btn" for="jg2"></label>
 								</div>
 							</li>
 							<li>
@@ -69,7 +74,8 @@
 									<p class="list-title">Receive Account Changes</p>
 								</div>
 								<div class="notification-toggle">
-									<input class="tgl tgl-ios" id="jg3" type="checkbox"> <label class="tgl-btn" for="jg3"></label>
+                  <% if(user.profile.settings.account_changes) { %>
+									<input onchange="notifications()" class="tgl tgl-ios" id="jg3" type="checkbox" checked> <% } else { %><input onchange="notifications()" class="tgl tgl-ios" id="jg3" type="checkbox"> <% } %><label class="tgl-btn" for="jg3"></label>
 								</div>
 							</li>
 							<li>
@@ -77,7 +83,7 @@
 									<p class="list-title">Recieve Weekly Product statistics</p>
 								</div>
 								<div class="notification-toggle">
-									<input class="tgl tgl-ios" id="jg4" type="checkbox"> <label class="tgl-btn" for="jg4"></label>
+                <% if(user.profile.settings.weekly_statistics) { %><input onchange="notifications()"class="tgl tgl-ios" id="jg4" type="checkbox" checked><% } else { %><input onchange="notifications()"class="tgl tgl-ios" id="jg4" type="checkbox"><% } %><label class="tgl-btn" for="jg4"></label>
 								</div>
 							</li>
 						</ul>
@@ -88,16 +94,18 @@
 				<div class="title">
 					<h2>Change Your Password</h2>
 				</div>
+        <form action="/profile/change_password" class="contact-form validate-form" id="pass" method="post" name="form" role="form">
 				<div class="info">
 					<h3><b>Old Password</b></h3><input class="input" id="oldpassword" name="oldpassword" placeholder="Old Password" type="password">
 				</div>
 				<div class="info">
 					<h3><b>New Password</b></h3>
-					<h5><input class="input" id="newpassword" name="newpassword" placeholder="NewPassword" type="password"></h5>
+					<h5><input class="input" id="newpassword" name="newpassword" placeholder="New Password" type="password"></h5>
 				</div>
 				<div class="info">
-					<button>Change Password</button>
+					<button type="button" onclick="changeP()">Change Password</button>
 				</div>
+        </form>
 			</div>
 		</div>
 	</div>
@@ -107,14 +115,6 @@
 	</script> 
 	<script>
 	</script> <%- include("../partials/footer") %>
-
-
-
-
-
-
-
-
 
 
 

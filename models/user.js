@@ -24,6 +24,33 @@ const userSchema = new Schema({
     image: {
     type: String,
     default: null
+    },
+
+    settings: {
+      
+      news_and_updates :{
+      type: Boolean,
+      default: false
+      },
+
+      product_updates :{
+      type: Boolean,
+      default: false
+      },
+
+      account_changes :{
+      type: Boolean,
+      default: false
+      },
+
+      weekly_statistics :{
+      type: Boolean,
+      default: false
+      },
+
+
+
+
     }
 
   },
