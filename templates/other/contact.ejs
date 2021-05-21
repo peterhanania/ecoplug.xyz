@@ -1,0 +1,43 @@
+<%- include("../partials/head", { user, path, title: "Ecoplug - Contact",  url}) %>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+	<link href="/css/contact.css"  type="text/css"  rel="stylesheet">
+	<link href="/css/tailwind.css"  type="text/css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-contact">
+            <div class="wrap-contact">
+                <form method="post" action="/contact" class="contact-form validate-form">
+                    
+                    <% if(alert) { %>
+                    <span class="contact-form-title">Response Recieved</span>
+                    <p>Your response was recieved. You will be emailed by our team regarding your message.</p>
+                    <% } else { %>
+                    <span class="contact-form-title">Contact Us</span>
+                    <div class="wrap-input rs1-wrap-input">
+                        <span class="label">Username</span>
+                       <input class="input" value="<%=user.username%>"type="text" name="name" placeholder="Username" disabled/>
+                        <span class="input-line"></span>
+                    </div>
+                    <div class="wrap-input rs1-wrap-input">
+                        <span class="label">Email</span>
+                        <input value="<%= user.email %>" class="input" type="email" name="email" placeholder="Email" disabled/>
+                        <span class="input-line"></span>
+                    </div>
+                    <div class="wrap-input">
+                        <span class="label">Message</span>
+                        <textarea class="input" name="message" placeholder="Your Message"></textarea>
+                        <span class="input-line"></span>
+                    </div>
+                  
+                     <div class="container-contact-form-btn">
+             <button type="Submit">Submit</button>
+             </div>
+                </form>
+              <% } %>
+            </div>
+        </div>
+</body>
+
+<%- include("../partials/footer.ejs") %>

@@ -124,7 +124,9 @@ app.use(async (req, res, next) => {
     const user = await User.findById(req.session.user._id);
     if (!user) {
       return next();
-    }
+    };
+    const doMatch = user.password === req.session.user.password;
+    if(!doMatch) return next();
     req.user = user;
     next();
   } catch (err) {
@@ -141,6 +143,26 @@ app.use(async (req, res, next) => {
 
      renderTemplate(res, req, "auth/login.ejs",{
      alert: tag === "authenticated" ? "Thank you for signing up! Please login below." : null,
+    });
+
+ });
+
+
+ app.get("/contact", checkAuth, (req, res, next) => {
+     
+     renderTemplate(res, req, "other/contact.ejs",{
+     alert: null,
+    });
+
+ });
+
+
+ app.post("/contact", checkAuth, (req, res, next) => {
+    
+     
+
+     renderTemplate(res, req, "other/contact.ejs",{
+     alert: `Submitted`,
     });
 
  });
@@ -765,7 +787,7 @@ app.post(
 
     if(emailCooldown.has(user._id.toString())){
     return renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `We already sent an email. Please check your junk / inbox folder!`,
+     alert: `We already sent an email. Please check your inbox/junk/spam folder!`,
     });
     };
 
@@ -997,6 +1019,13 @@ req.session.destroy(err => {
 
    app.post("/products", async(req, res) => {
    return res.send('The current feature is under development!')
+
+ });
+
+
+ app.get("*", async(req, res) => {
+  renderTemplate(res, req, "other/404.ejs",{
+  });
 
  });
 

@@ -8,12 +8,12 @@
 <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
 <ul class="menu">
   <% if (path !== "/") { %>
- <li><a id="purple" class="nav_menu" href="https://<%= hostname %>/" target="_blank" rel="noopener">Home</a></li>
+ <li><a id="purple" class="nav_menu" href="https://<%= hostname %>/" rel="noopener">Home</a></li>
  <% } else { %>
- <li ><a id="purple" class="nav_menu" href="https://<%= hostname %>/" target="_blank" rel="noopener">Contact</a></li>
+ <li ><a id="purple" class="nav_menu" href="https://<%= hostname %>/contact"rel="noopener">Contact</a></li>
  <% } %>
- <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/" target="_blank" rel="noopener">Products</a></li>
- <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/" target="_blank" rel="noopener">About</a></li>
+ <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/products" rel="noopener">Products</a></li>
+ <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/about" rel="noopener">About</a></li>
 <% if(user) { %>
 <% if (user.profile.image) {
 avatar = `/${user.profile.image}`

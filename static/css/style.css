@@ -49,6 +49,12 @@ bottom: 0;
 z-index: 999999;
 }
 
+.home-top {
+background: url('https://ecoplug.xyz/home/banner.png') no-repeat 100% 100%;
+background-size: cover;
+position: relative;
+}
+
 .preloader {
 height: 100%;
 width: 100%;
@@ -66,12 +72,37 @@ opacity: 1;
 .loader {
   font-family: 'Staatliches', cursive;
   position: fixed;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
   left: 0;
   top: 0;
   background: white;
-  width: 100%;
   height: 100vh;
-  animation: backgroundChange .5s linear 3s forwards;
+  padding-top: 15%;
+}
+.loader img{
+  position:absolute;
+  left:0;
+  right:0;
+  margin:auto auto;
+  width: 200px;
+  height: 200px;
+  opacity: 1 !important;
+  animation-name: heartFadeInOut; 
+  animation-iteration-count: infinite;
+  animation-duration: 2s;
+}
+ @keyframes heartFadeInOut {
+  0% {transform: scale(1);}
+  25% {transform: scale(.97);}
+  35% {transform: scale(.9);}
+  45% {transform: scale(1.1);}
+  55% {transform: scale(.9);}
+  65% {transform: scale(1.1);}
+  75% {transform: scale(1.03);}
+  100% {transform: scale(1);}
 }
 
 .load-text {
@@ -405,7 +436,7 @@ border: none;
 	display: inline-block;
 	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 	transition: all 0.5s;
-  background-color: #7289da;
+  background-color: #40BB60;
   text-decoration: none;
 }
 
@@ -415,7 +446,7 @@ color: red
 
 
 .nav li .nav-menu-button:hover{
-  background-color: #6378c5;
+  background-color: #68BF79;
 }
 
 .nav li .nav-menu-button i {
@@ -897,7 +928,7 @@ transform: rotate(45deg);
 transform: rotate(-45deg);
 }
 
-#purple:hover {color: #6378c5; font-weight: bold;}
+#purple:hover {color: #40BB60; font-weight: bold;}
 
 ::-webkit-scrollbar {
 width: 8px;
