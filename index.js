@@ -113,7 +113,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
  const checkAuth = (req, res, next) => {
   if (req.user) return next();
   req.session.backURL = req.url;
-  res.redirect("/login");
+  res.redirect("/login?user=not_authenticated");
  }
 
 app.use(async (req, res, next) => {
@@ -139,10 +139,16 @@ app.use(async (req, res, next) => {
  app.get("/login", (req, res, next) => {
      
        var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-       var tag = new URL(fullUrl).searchParams.get("user")
+       let tag = new URL(fullUrl).searchParams.get("user");
+       
+      let alert = false;
+      if(tag && tag === "authenticated") alert = "Thank you for signing up! Please login below.";
+      if(tag && tag === "not_authenticated") alert = "Please login to view this Page.";
+       
+
 
      renderTemplate(res, req, "auth/login.ejs",{
-     alert: tag === "authenticated" ? "Thank you for signing up! Please login below." : null,
+     alert: alert ? alert : null,
     });
 
  });
@@ -489,7 +495,15 @@ app.post(
      alert: `This email is already signed up. Press login to login!`,
     });
       return;
-    }
+    };
+
+        if(req.user){
+    renderTemplate(res, req, "auth/signup.ejs",{
+     alert: `You are already logged in as ${req.user.username}!`,
+    });
+      return;
+    };
+    
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
       email: email.split(" ").join(""),
@@ -498,7 +512,7 @@ app.post(
       joinedAt: Date.now()
     });
     await user.save();
-
+   
 
     res.redirect('/login?user=authenticated')
 
@@ -734,13 +748,21 @@ app.post(
       return renderTemplate(res, req, "auth/login.ejs",{
      alert: `An invalid email or password was provided.`,
     });
-    }
+    };
+    
+    if(req.user){
+    renderTemplate(res, req, "auth/signup.ejs",{
+     alert: `You are already logged in as ${req.user.username}!`,
+    });
+      return;
+    };
+
     const doMatch = await bcrypt.compare(password, user.password);
     if (doMatch) {
       req.session.isLoggedIn = true;
       req.session.user = user;
       return req.session.save(err => {
-        res.redirect('/profile');
+        res.redirect(req.session.backURL ?  req.session.backURL : '/profile');
       });
     }
           return renderTemplate(res, req, "auth/login.ejs",{
