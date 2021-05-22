@@ -1008,6 +1008,7 @@ app.post(
         if (!userId || !passwordToken) return res.redirect('/forgot')
 
 
+
         let resetUser;
         const user = await User.findOne({
             resetToken: passwordToken,
@@ -1016,6 +1017,15 @@ app.post(
             },
             _id: userId
         });
+
+          if (req.user && req.user.email === user.email) {
+          renderTemplate(res, req, "auth/newpass.ejs", {
+                alert: `You are already logged in as ${req.user.username}!`,
+          });
+          return;
+        };
+
+
         resetUser = user;
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         resetUser.password = hashedPassword;
@@ -1044,8 +1054,9 @@ app.get('/forgot/:token', async function(req, res) {
         return renderTemplate(res, req, "auth/forgot.ejs", {
             alert: `Invalid Reset token was provided..`,
         });
-
+    
     } else {
+      
         return renderTemplate(res, req, "auth/newpass.ejs", {
             alert: null,
             userId: user._id.toString(),
