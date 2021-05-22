@@ -233,6 +233,7 @@ iframe {
 	height: 72px;
 	width: 72px;
 	padding-right: 5px;
+  cursor: pointer;
 }
 .tgl {
 	display: none;

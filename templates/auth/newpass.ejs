@@ -38,6 +38,7 @@
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'>
 	</script> 
 	<script src='/js/main.js'></script>
+  <script src="/js/new_password.js"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
   AOS.init();
@@ -45,16 +46,3 @@
 </body>
 
 <%- include("../partials/footer.ejs") %>
-
-<script>
-function submit(){
-
-        const loader = document.getElementById("loader");
-        loader.style.display = "block";
-
-        const form = document.getElementById("form");
-        form.style.display = "none";
-      
-         setTimeout(()=>{document.getElementById("form").submit();}, 2000) 
-}
-</script>

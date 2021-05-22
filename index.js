@@ -1,8 +1,11 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const url = require("url");
- const nodemailer = require('nodemailer');
-const { body, validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
+const {
+    body,
+    validationResult
+} = require('express-validator');
 const path = require("path");
 const express = require("express");
 const sendgridTransport = require('nodemailer-sendgrid-transport');
@@ -12,7 +15,9 @@ const MongoStore = require('connect-mongo');
 const ms = require('ms');
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
-const { readdirSync } = require('fs');
+const {
+    readdirSync
+} = require('fs');
 const emailCooldown = new Set();
 const fs = require('fs');
 const mongoose = require('mongoose')
@@ -25,62 +30,85 @@ const Recipient = require("mailersend").Recipient;
 const EmailParams = require("mailersend").EmailParams;
 const MailerSend = require("mailersend");
 
+
+function isFile(pathItem) {
+try{
+
+fs.lstatSync(pathItem).isDirectory();
+
+}catch(e){
+   if(e.code == 'ENOENT'){
+     return false;
+   } else {
+     return true;
+   }
+}
+};
+
 const mailersend = new MailerSend({
     api_key: process.env.mail,
 });
 
 const deleteFile = filePath => {
-  fs.unlink(filePath, err => {
-    if (err) {
-      throw err;
+    try{
+    if(typeof(isFile(filePath)) === "undefined" || isFile(filePath)){
+    fs.unlink(filePath, err => {
+        if (err) {
+            throw err;
+        }
+    });  
+    };
+    } catch (error) {
+      throw error;
     }
-  });
 };
 
- const dataDir = path.resolve(`${process.cwd()}${path.sep}`)
- const templateDir = path.resolve(`${dataDir}${path.sep}templates`); 
+const dataDir = path.resolve(`${process.cwd()}${path.sep}`)
+const templateDir = path.resolve(`${dataDir}${path.sep}templates`);
 
 
 app.use(session({
-  secret : process.env.secret,
-  resave : true,
-  saveUninitialized : true,
-  store :MongoStore.create({ mongoUrl: process.env.mongo })
+    secret: process.env.secret,
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.mongo
+    })
 }));
 
 
 var moment = require('moment');
 app.locals.moment = require('moment');
 
-   app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({
-      extended: true
-    }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(
 
-  multer({
-    storage: multer.diskStorage({
-      destination: (req, file, callback) => {
-        callback(null, "images");
-      },
-      filename: (req, file, callback) => {
-       
+    multer({
+        storage: multer.diskStorage({
+            destination: (req, file, callback) => {
+                callback(null, "images");
+            },
+            filename: (req, file, callback) => {
 
-        callback(null, new Date().toISOString() + file.originalname);
-      }
-    }),
-    fileFilter: (req, file, callback) => {
-      if (
-        file.mimetype === "image/png" ||
-        file.mimetype === "image/jpg" ||
-        file.mimetype === "image/jpeg"
-      ) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    }
-  }).single("image")
+
+                callback(null, new Date().toISOString() + file.originalname);
+            }
+        }),
+        fileFilter: (req, file, callback) => {
+            if (
+                file.mimetype === "image/png" ||
+                file.mimetype === "image/jpg" ||
+                file.mimetype === "image/jpeg"
+            ) {
+                callback(null, true);
+            } else {
+                callback(null, false);
+            }
+        }
+    }).single("image")
 );
 
 app.use(express.static('static'));
@@ -88,251 +116,260 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 
 
 
- app.locals.domain = "https://ecoplug.xyz".split("//")[1];
- app.engine("html", ejs.renderFile);
- app.set("view engine", "html");
+app.locals.domain = "https://ecoplug.xyz".split("//")[1];
+app.engine("html", ejs.renderFile);
+app.set("view engine", "html");
 
- const renderTemplate = (res, req, template, data = {}) => {
-  var hostname = req.headers.host;
-  var pathname = url.parse(req.url).pathname;
-  const baseData = {
-   https: "https://",
-   domain: "https://ecoplug.xyz",
-   hostname: hostname,
-   pathname: pathname,
-   path: req.path,
-   user: req.user ? req.user : null,
-   url: res,
-   req: req,
-  };
+const renderTemplate = (res, req, template, data = {}) => {
+    var hostname = req.headers.host;
+    var pathname = url.parse(req.url).pathname;
+    const baseData = {
+        https: "https://",
+        domain: "https://ecoplug.xyz",
+        hostname: hostname,
+        pathname: pathname,
+        path: req.path,
+        user: req.user ? req.user : null,
+        url: res,
+        req: req,
+    };
 
 
-  res.render(path.resolve(`${templateDir}${path.sep}${template}`), Object.assign(baseData, data));
- };
+    res.render(path.resolve(`${templateDir}${path.sep}${template}`), Object.assign(baseData, data));
+};
 
- const checkAuth = (req, res, next) => {
-  if (req.user) return next();
-  req.session.backURL = req.url;
-  res.redirect("/login?user=not_authenticated");
- }
+const checkAuth = (req, res, next) => {
+    if (req.user) return next();
+    req.session.backURL = req.url;
+    res.redirect("/login?user=not_authenticated");
+}
 
 app.use(async (req, res, next) => {
-  if (!req.session.user) {
-    return next();
-  }
-  try {
-    const user = await User.findById(req.session.user._id);
-    if (!user) {
-      return next();
-    };
-    const doMatch = user.password === req.session.user.password;
-    if(!doMatch) return next();
-    req.user = user;
-    next();
-  } catch (err) {
-    next(new Error(err));
-  }
+    if (!req.session.user) {
+        return next();
+    }
+    try {
+        const user = await User.findById(req.session.user._id);
+        if (!user) {
+            return next();
+        };
+        const doMatch = user.password === req.session.user.password;
+        if (!doMatch) return next();
+        req.user = user;
+        next();
+    } catch (err) {
+        next(new Error(err));
+    }
 });
-  
 
 
- app.get("/login", (req, res, next) => {
-     
-       var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-       let tag = new URL(fullUrl).searchParams.get("user");
-       
-      let alert = false;
-      if(tag && tag === "authenticated") alert = "Thank you for signing up! Please login below.";
-      if(tag && tag === "not_authenticated") alert = "Please login to view this Page.";
-       
+
+app.get("/login", (req, res, next) => {
+
+    var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+    let tag = new URL(fullUrl).searchParams.get("user");
+
+    let alert = false;
+    if (tag && tag === "authenticated") alert = "Thank you for signing up! Please login below.";
+    if (tag && tag === "not_authenticated") alert = "Please login to view this Page.";
 
 
-     renderTemplate(res, req, "auth/login.ejs",{
-     alert: alert ? alert : null,
+
+    renderTemplate(res, req, "auth/login.ejs", {
+        alert: alert ? alert : null,
     });
 
- });
+});
 
+app.get("/about", (req, res, next) => {
 
- app.get("/contact", checkAuth, (req, res, next) => {
-     
-     renderTemplate(res, req, "other/contact.ejs",{
-     alert: null,
+    renderTemplate(res, req, "other/about.ejs", {
+        alert: null,
     });
 
- });
+});
+app.get("/contact", checkAuth, (req, res, next) => {
 
-
- app.post("/contact", checkAuth, (req, res, next) => {
-    
-     
-
-     renderTemplate(res, req, "other/contact.ejs",{
-     alert: `Submitted`,
+    renderTemplate(res, req, "other/contact.ejs", {
+        alert: null,
     });
 
- });
+});
 
 
+app.post("/contact", checkAuth, (req, res, next) => {
 
- app.get("/profile", checkAuth, (req, res, next) => {
-     
-     renderTemplate(res, req, "user/profile.ejs",{
-     alert: null,
+
+    renderTemplate(res, req, "other/contact.ejs", {
+        alert: `Submitted`,
     });
 
- });
-
- app.post("/profile/notification_settings", checkAuth, async(req, res, next) => {
-
- const user = await User.findOne({
-       email: req.user.email
-     });
-    
-     if(user){
-       if(req.body.noti1){
-       user.profile.settings.news_and_updates = true
-       } else {
-       user.profile.settings.news_and_updates = false
-       };
+});
 
 
-      if(req.body.noti2){
-        user.profile.settings.product_updates = true
-       } else {
-        user.profile.settings.product_updates = false
-       };
 
+app.get("/profile", checkAuth, (req, res, next) => {
 
-      if(req.body.noti3){
-       user.profile.settings.account_changes = true
-       } else {
-       user.profile.settings.account_changes = false
-       };
-
-
-      if(req.body.noti4){
-        user.profile.settings.weekly_statistics = true
-       } else {
-        user.profile.settings.weekly_statistics = false
-       };
-
-       await user.save();
-
-     }
- });
-
- 
-
-
- app.post("/profile/change_profile_picture", checkAuth, async(req, res, next) => {
-     
-   
-     const user = await User.findOne({
-       email: req.user.email
-     });
-    
-     if(user){
-       
-
-       if(req &&  req.file && req.file.path){
-         if(user.profile.image){
-         await deleteFile(user.profile.image)
-         };
-         user.profile.image = req.file.path;
-         await user.save();
-
-         return renderTemplate(res, req, "user/profile.ejs",{
-     alert: null,
+    renderTemplate(res, req, "user/profile.ejs", {
+        alert: null,
     });
+
+});
+
+app.post("/profile/notification_settings", checkAuth, async (req, res, next) => {
+
+    const user = await User.findOne({
+        email: req.user.email
+    });
+
+    if (user) {
+        if (req.body.noti1) {
+            user.profile.settings.news_and_updates = true
+        } else {
+            user.profile.settings.news_and_updates = false
         };
 
 
-        
-     renderTemplate(res, req, "user/profile.ejs",{
-     alert: `Image format not supported. Supported Formats: /png - /jpeg`,
-     path: null,
+        if (req.body.noti2) {
+            user.profile.settings.product_updates = true
+        } else {
+            user.profile.settings.product_updates = false
+        };
+
+
+        if (req.body.noti3) {
+            user.profile.settings.account_changes = true
+        } else {
+            user.profile.settings.account_changes = false
+        };
+
+
+        if (req.body.noti4) {
+            user.profile.settings.weekly_statistics = true
+        } else {
+            user.profile.settings.weekly_statistics = false
+        };
+
+        await user.save();
+
+    }
+});
+
+
+
+
+app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) => {
+
+
+    const user = await User.findOne({
+        email: req.user.email
     });
-      
-     };
+
+    if (user) {
 
 
-    
+        if (req && req.file && req.file.path) {
+            if (user.profile.image) {
+                await deleteFile(user.profile.image)
+            };
+            user.profile.image = req.file.path;
+            await user.save();
+
+            return renderTemplate(res, req, "user/profile.ejs", {
+                alert: null,
+            });
+        };
 
 
- });
 
- app.post("/profile/change_password", 
- checkAuth, 
- body('oldpassword').isLength({ min: 6, max: 32 }).withMessage('Please provide a password (6 - 32ch)'),
-body('newpassword').isLength({ min: 6, max: 32 }).withMessage('Please provide a password (6 - 32ch)'),
- async(req, res, next) => {
+        renderTemplate(res, req, "user/profile.ejs", {
+            alert: `Image format not supported. Supported Formats: /png - /jpeg`,
+            path: null,
+        });
 
-
- const user = await User.findOne({
-       email: req.user.email
-     });
-    
-     if(user){
-      
-      const oldpass = req.body.oldpassword;
-      const newpass = req.body.newpassword;
-      
-
-          const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return renderTemplate(res, req, "user/profile.ejs",{
-     alert: errors.array()[0].msg,
-    });
     };
-          if(!oldpass || !newpass){
-         return res.redirect('/profile')
-      }
-   const doMatch = await bcrypt.compare(oldpass, user.password);
-   if(!doMatch){
-    return renderTemplate(res, req, "user/profile.ejs",{
-     alert: `Invalid old Password provided.`
-    });
-   };
-  
-  if(change_password_cooldown.has(user._id.toString())){
-    return renderTemplate(res, req, "user/profile.ejs",{
-     alert: `You recently changed your password. Please come back later. (default cooldown: 1 hour)`
-    });
-  }
-
-
-  const newUserPassword = await bcrypt.hash(newpass, 12);
-   user.password = newUserPassword;
-   await user.save();
-   
-   req.user = null;
-   req.session.destroy(err => {
-
-
-
-    renderTemplate(res, req, "auth/login.ejs",{
-     alert: `Successfully changed passwords! Please login`,
-    });
-    change_password_cooldown.add(user._id.toString());
-    setTimeout(()=>{
-    change_password_cooldown.delete(user._id.toString());
-    }, 3600000);
 
 
 
 
+});
 
-  try { 
-  if(user.profile.settings.account_changes) {
-  const recipients = [new Recipient(user.email, user.username)];
+app.post("/profile/change_password",
+    checkAuth,
+    body('oldpassword').isLength({
+        min: 6,
+        max: 32
+    }).withMessage('Please provide a password (6 - 32ch)'),
+    body('newpassword').isLength({
+        min: 6,
+        max: 32
+    }).withMessage('Please provide a password (6 - 32ch)'),
+    async (req, res, next) => {
 
-const emailParams = new EmailParams()
-    .setFrom("support@ecoplug.xyz")
-    .setFromName("Ecoplug")
-    .setRecipients(recipients)
-    .setSubject(`${user.username} | Password Change`)
-    .setHtml(`
+
+        const user = await User.findOne({
+            email: req.user.email
+        });
+
+        if (user) {
+
+            const oldpass = req.body.oldpassword;
+            const newpass = req.body.newpassword;
+
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return renderTemplate(res, req, "user/profile.ejs", {
+                    alert: errors.array()[0].msg,
+                });
+            };
+            if (!oldpass || !newpass) {
+                return res.redirect('/profile')
+            }
+            const doMatch = await bcrypt.compare(oldpass, user.password);
+            if (!doMatch) {
+                return renderTemplate(res, req, "user/profile.ejs", {
+                    alert: `Invalid old Password provided.`
+                });
+            };
+
+            if (change_password_cooldown.has(user._id.toString())) {
+                return renderTemplate(res, req, "user/profile.ejs", {
+                    alert: `You recently changed your password. Please come back later. (default cooldown: 1 hour)`
+                });
+            }
+
+
+            const newUserPassword = await bcrypt.hash(newpass, 12);
+            user.password = newUserPassword;
+            await user.save();
+
+            req.user = null;
+            req.session.destroy(err => {
+
+
+
+                renderTemplate(res, req, "auth/login.ejs", {
+                    alert: `Successfully changed passwords! Please login`,
+                });
+                change_password_cooldown.add(user._id.toString());
+                setTimeout(() => {
+                    change_password_cooldown.delete(user._id.toString());
+                }, 3600000);
+
+
+
+
+                try {
+                    if (user.profile.settings.account_changes) {
+                        const recipients = [new Recipient(user.email, user.username)];
+
+                        const emailParams = new EmailParams()
+                            .setFrom("support@ecoplug.xyz")
+                            .setFromName("Ecoplug")
+                            .setRecipients(recipients)
+                            .setSubject(`${user.username} | Password Change`)
+                            .setHtml(`
 <!doctype html>
 <html lang="en-US">
 
@@ -410,123 +447,125 @@ const emailParams = new EmailParams()
 </body>
 
 </html>`)
-    .setText("Passoword change on your account");
-mailersend.send(emailParams);
-  }
-  } catch (error) {
-  return
-  }
+                            .setText("Passoword change on your account");
+                        mailersend.send(emailParams);
+                    }
+                } catch (error) {
+                    return
+                }
 
 
 
 
+            });
 
 
 
-
-  });
-
-
-
-    }
- });
+        }
+    });
 
 
 app.post(
-  '/signup',
-  body('email').isEmail().withMessage('Please provide a valid email adress.'),
-  body('password').isLength({ min: 6, max: 32 }).withMessage('Please provide a password (6 - 32ch)'),
-  body('username').isLength({ min: 5, max: 32 }).withMessage('Please provide a username (5 - 32ch)'),
-  
- async (req, res) => {
-  
-    const errors = validationResult(req);
+    '/signup',
+    body('email').isEmail().withMessage('Please provide a valid email adress.'),
+    body('password').isLength({
+        min: 6,
+        max: 32
+    }).withMessage('Please provide a password (6 - 32ch)'),
+    body('username').isLength({
+        min: 5,
+        max: 32
+    }).withMessage('Please provide a username (5 - 32ch)'),
 
-    
-    const email = req.body.email;
-    const password = req.body.password;
-    const cpassword = req.body.confirmPassword;
-    const username = req.body.username
+    async (req, res) => {
 
-    if(!email){
-      return renderTemplate(res, req, "auth/signup.ejs",{
-     alert: `Please provide an email adress`,
-    });
-    };
-
-    if(!password || !cpassword){
-       return renderTemplate(res, req, "auth/signup.ejs",{
-     alert:`Please provide a password`,
-    });
-    }
-
-    if(password !== cpassword){
-             return renderTemplate(res, req, "auth/signup.ejs",{
-     alert:`Please provide matching passwords.`,
-    });
-    }
-    
+        const errors = validationResult(req);
 
 
+        const email = req.body.email;
+        const password = req.body.password;
+        const cpassword = req.body.confirmPassword;
+        const username = req.body.username
 
-    if (!errors.isEmpty()) {
-      return renderTemplate(res, req, "auth/signup.ejs",{
-     alert: errors.array()[0].msg,
-    });
-    };
-    
-    const validateUsernameDatabase =await User.findOne({
-    username: username
-    });
+        if (!email) {
+            return renderTemplate(res, req, "auth/signup.ejs", {
+                alert: `Please provide an email adress`,
+            });
+        };
 
-    if(validateUsernameDatabase){
-    renderTemplate(res, req, "auth/signup.ejs",{
-     alert: `This username is taken. Please try another`,
-    });
-      return;
-    }
+        if (!password || !cpassword) {
+            return renderTemplate(res, req, "auth/signup.ejs", {
+                alert: `Please provide a password`,
+            });
+        }
 
-    const validateEmailDatabase =await User.findOne({
-    email: email
-    });
-
-    if(validateEmailDatabase){
-    renderTemplate(res, req, "auth/signup.ejs",{
-     alert: `This email is already signed up. Press login to login!`,
-    });
-      return;
-    };
-
-        if(req.user){
-    renderTemplate(res, req, "auth/signup.ejs",{
-     alert: `You are already logged in as ${req.user.username}!`,
-    });
-      return;
-    };
-    
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new User({
-      email: email.split(" ").join(""),
-      password: hashedPassword,
-      username: username.split(" ").join(""),
-      joinedAt: Date.now()
-    });
-    await user.save();
-   
-
-    res.redirect('/login?user=authenticated')
-
-try {
+        if (password !== cpassword) {
+            return renderTemplate(res, req, "auth/signup.ejs", {
+                alert: `Please provide matching passwords.`,
+            });
+        }
 
 
-    const recipients = [new Recipient(user.email, user.username)];
 
-const emailParams = new EmailParams()
-    .setFrom("support@ecoplug.xyz")
-    .setFromName("Ecoplug")
-    .setRecipients(recipients)
-    .setSubject(`${user.username} |  Welcome to Ecoplug`)
-    .setHtml(`<!DOCTYPE html>
+
+        if (!errors.isEmpty()) {
+            return renderTemplate(res, req, "auth/signup.ejs", {
+                alert: errors.array()[0].msg,
+            });
+        };
+
+        const validateUsernameDatabase = await User.findOne({
+            username: username
+        });
+
+        if (validateUsernameDatabase) {
+            renderTemplate(res, req, "auth/signup.ejs", {
+                alert: `This username is taken. Please try another`,
+            });
+            return;
+        }
+
+        const validateEmailDatabase = await User.findOne({
+            email: email
+        });
+
+        if (validateEmailDatabase) {
+            renderTemplate(res, req, "auth/signup.ejs", {
+                alert: `This email is already signed up. Press login to login!`,
+            });
+            return;
+        };
+
+        if (req.user) {
+            renderTemplate(res, req, "auth/signup.ejs", {
+                alert: `You are already logged in as ${req.user.username}!`,
+            });
+            return;
+        };
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const user = new User({
+            email: email.split(" ").join(""),
+            password: hashedPassword,
+            username: username.split(" ").join(""),
+            joinedAt: Date.now()
+        });
+        await user.save();
+
+
+        res.redirect('/login?user=authenticated')
+
+        try {
+
+
+            const recipients = [new Recipient(user.email, user.username)];
+
+            const emailParams = new EmailParams()
+                .setFrom("support@ecoplug.xyz")
+                .setFromName("Ecoplug")
+                .setRecipients(recipients)
+                .setSubject(`${user.username} |  Welcome to Ecoplug`)
+                .setHtml(`<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -691,153 +730,160 @@ const emailParams = new EmailParams()
 </body>
 </html>
 `)
-    .setText(`Hey ${user.username}, Welcome to ecoplug!!`);
-mailersend.send(emailParams);
-} catch (error) {
-  return;
-}
-   
-  },
-);
-  app.get("/signup", (req, res, next) => {
+                .setText(`Hey ${user.username}, Welcome to ecoplug!!`);
+            mailersend.send(emailParams);
+        } catch (error) {
+            return;
+        }
 
-     renderTemplate(res, req, "auth/signup.ejs",{
-     alert: null,
+    },
+);
+app.get("/signup", (req, res, next) => {
+
+    renderTemplate(res, req, "auth/signup.ejs", {
+        alert: null,
     });
 
- });
+});
 
 
 app.post(
-  '/login',
-  body('email').isEmail().withMessage('Please provide a valid email adress.'),
-  body('password').isLength({ min: 6, max: 32 }).withMessage('Please provide a password (6 - 32ch)'),
-  
- async (req, res) => {
-   
-    const errors = validationResult(req);
+    '/login',
+    body('email').isEmail().withMessage('Please provide a valid email adress.'),
+    body('password').isLength({
+        min: 6,
+        max: 32
+    }).withMessage('Please provide a password (6 - 32ch)'),
 
-    
-    const email = req.body.email;
-    const password = req.body.password;
+    async (req, res) => {
 
-
-    if(!email){
-      return renderTemplate(res, req, "auth/login.ejs",{
-     alert: `Please provide an email adress`,
-    });
-    };
-
-    if(!password){
-       return renderTemplate(res, req, "auth/login.ejs",{
-     alert:`Please provide a password`,
-    });
-    }
+        const errors = validationResult(req);
 
 
-    if (!errors.isEmpty()) {
-      return renderTemplate(res, req, "auth/login.ejs",{
-     alert: errors.array()[0].msg,
-    });
-    };
-    
-     try {
+        const email = req.body.email;
+        const password = req.body.password;
 
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      return renderTemplate(res, req, "auth/login.ejs",{
-     alert: `An invalid email or password was provided.`,
-    });
-    };
-    
-    if(req.user){
-    renderTemplate(res, req, "auth/signup.ejs",{
-     alert: `You are already logged in as ${req.user.username}!`,
-    });
-      return;
-    };
 
-    const doMatch = await bcrypt.compare(password, user.password);
-    if (doMatch) {
-      req.session.isLoggedIn = true;
-      req.session.user = user;
-      return req.session.save(err => {
-        res.redirect(req.session.backURL ?  req.session.backURL : '/profile');
-      });
-    }
-          return renderTemplate(res, req, "auth/login.ejs",{
-     alert:`Invalid Email or Password Provided.`,
-    });
-  
+        if (!email) {
+            return renderTemplate(res, req, "auth/login.ejs", {
+                alert: `Please provide an email adress`,
+            });
+        };
 
-  } catch (err) {
-    res.send(`An error just occured. Please refresh the page.`)
-  }
-   
-  },
+        if (!password) {
+            return renderTemplate(res, req, "auth/login.ejs", {
+                alert: `Please provide a password`,
+            });
+        }
+
+
+        if (!errors.isEmpty()) {
+            return renderTemplate(res, req, "auth/login.ejs", {
+                alert: errors.array()[0].msg,
+            });
+        };
+
+        try {
+
+            const user = await User.findOne({
+                email: email
+            });
+            if (!user) {
+                return renderTemplate(res, req, "auth/login.ejs", {
+                    alert: `An invalid email or password was provided.`,
+                });
+            };
+
+            if (req.user) {
+                renderTemplate(res, req, "auth/signup.ejs", {
+                    alert: `You are already logged in as ${req.user.username}!`,
+                });
+                return;
+            };
+
+            const doMatch = await bcrypt.compare(password, user.password);
+            if (doMatch) {
+                req.session.isLoggedIn = true;
+                req.session.user = user;
+                return req.session.save(err => {
+                    res.redirect(req.session.backURL ? req.session.backURL : '/profile');
+                });
+            }
+            return renderTemplate(res, req, "auth/login.ejs", {
+                alert: `Invalid Email or Password Provided.`,
+            });
+
+
+        } catch (err) {
+            res.send(`An error just occured. Please refresh the page.`)
+        }
+
+    },
 );
 
 
 app.post(
-  '/forgot',
-  body('email').isEmail().withMessage('Please provide a valid email adress.'),
-
-  
- async (req, res) => {
-   
-    const errors = validationResult(req);
-
-    
-    const email = req.body.email;
+    '/forgot',
+    body('email').isEmail().withMessage('Please provide a valid email adress.'),
 
 
+    async (req, res) => {
 
-    if(!email){
-      return renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `Please provide an email adress`,
-    });
-    };
-    
+        const errors = validationResult(req);
 
 
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      return renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `An invalid email was provided.`,
-    });
-    };
+        const email = req.body.email;
 
-    if(emailCooldown.has(user._id.toString())){
-    return renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `We already sent an email. Please check your inbox/junk/spam folder!`,
-    });
-    };
 
-     crypto.randomBytes(32, async (err, buffer) => {
-    if (err) {
-      return res.redirect('/forgot');
-    }
-   
-      const token = buffer.toString('hex');
 
-     
-      user.resetToken = token;
-      user.resetTokenExpiration = Date.now() + 3600000;
-      await user.save();
-     
-      
-     renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `An email was sent to your inbox. Please check your email!`,
-    });
-      
-const recipients = [new Recipient(user.email, user.username)];
+        if (!email) {
+            return renderTemplate(res, req, "auth/forgot.ejs", {
+                alert: `Please provide an email adress`,
+            });
+        };
 
-const emailParams = new EmailParams()
-    .setFrom("support@ecoplug.xyz")
-    .setFromName("Ecoplug")
-    .setRecipients(recipients)
-    .setSubject(`${user.username} | Password Reset`)
-    .setHtml(`
+
+
+        const user = await User.findOne({
+            email: email
+        });
+        if (!user) {
+            return renderTemplate(res, req, "auth/forgot.ejs", {
+                alert: `An invalid email was provided.`,
+            });
+        };
+
+        if (emailCooldown.has(user._id.toString())) {
+            return renderTemplate(res, req, "auth/forgot.ejs", {
+                alert: `We already sent an email. Please check your inbox/junk/spam folder!`,
+            });
+        };
+
+        crypto.randomBytes(32, async (err, buffer) => {
+            if (err) {
+                return res.redirect('/forgot');
+            }
+
+            const token = buffer.toString('hex');
+
+
+            user.resetToken = token;
+            user.resetTokenExpiration = Date.now() + 3600000;
+            await user.save();
+
+
+            renderTemplate(res, req, "auth/forgot.ejs", {
+                alert: `An email was sent to your inbox. Please check your email!`,
+            });
+
+            const recipients = [new Recipient(user.email, user.username)];
+
+            const emailParams = new EmailParams()
+                .setFrom("support@ecoplug.xyz")
+                .setFromName("Ecoplug")
+                .setRecipients(recipients)
+                .setSubject(`${user.username} | Password Reset`)
+                .setHtml(`
 <!doctype html>
 <html lang="en-US">
 
@@ -917,152 +963,155 @@ const emailParams = new EmailParams()
 </body>
 
 </html>`)
-    .setText("You requested a password reset.");
-mailersend.send(emailParams);
-emailCooldown.add(user._id.toString());
-setTimeout(()=>{
-emailCooldown.delete(user._id.toString());
-}, 3600000)
-     });
-   
-  },
+                .setText("You requested a password reset.");
+            mailersend.send(emailParams);
+            emailCooldown.add(user._id.toString());
+            setTimeout(() => {
+                emailCooldown.delete(user._id.toString());
+            }, 3600000)
+        });
+
+    },
 );
 
 
- app.post(
-   "/new-password", 
-   body('password').isLength({ min: 6, max: 32 }).withMessage('Please provide a password (6 - 32ch)'),
-  async (req, res) => {
-  const newPassword = req.body.password;
-  const userId = req.body.userId;
-  const passwordToken = req.body.passwordToken;
-  
-  if(!newPassword){
-     renderTemplate(res, req, "auth/newpass.ejs",{
-      alert: `Please provide a password!`,
-      userId: userId,
-      passwordToken: passwordToken,
-    });
-     
-  };
+app.post(
+    "/new-password",
+    body('password').isLength({
+        min: 6,
+        max: 32
+    }).withMessage('Please provide a password (6 - 32ch)'),
+    async (req, res) => {
+        const newPassword = req.body.password;
+        const userId = req.body.userId;
+        const passwordToken = req.body.passwordToken;
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return renderTemplate(res, req, "auth/newpass.ejs",{
-     alert: errors.array()[0].msg,
-      userId: userId,
-      passwordToken: passwordToken,
-    });
-    };
-  
+        if (!newPassword) {
+            renderTemplate(res, req, "auth/newpass.ejs", {
+                alert: `Please provide a password!`,
+                userId: userId,
+                passwordToken: passwordToken,
+            });
 
-  if(!userId || !passwordToken) return res.redirect('/forgot')
+        };
 
-
-  let resetUser;
-    const user = await User.findOne({
-      resetToken: passwordToken,
-      resetTokenExpiration: { $gt: Date.now() },
-      _id: userId
-    });
-    resetUser = user;
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-    resetUser.password = hashedPassword;
-    resetUser.resetToken = undefined;
-    resetUser.resetTokenExpiration = undefined;
-    await resetUser.save();
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return renderTemplate(res, req, "auth/newpass.ejs", {
+                alert: errors.array()[0].msg,
+                userId: userId,
+                passwordToken: passwordToken,
+            });
+        };
 
 
-    return renderTemplate(res, req, "auth/login.ejs",{
-      alert: `Password Changed. Please login!`,
-    });
-  },
+        if (!userId || !passwordToken) return res.redirect('/forgot')
+
+
+        let resetUser;
+        const user = await User.findOne({
+            resetToken: passwordToken,
+            resetTokenExpiration: {
+                $gt: Date.now()
+            },
+            _id: userId
+        });
+        resetUser = user;
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        resetUser.password = hashedPassword;
+        resetUser.resetToken = undefined;
+        resetUser.resetTokenExpiration = undefined;
+        await resetUser.save();
+
+
+        return renderTemplate(res, req, "auth/login.ejs", {
+            alert: `Password Changed. Please login!`,
+        });
+    },
 );
 
- app.get('/forgot/:token', async function(req,res){
+app.get('/forgot/:token', async function(req, res) {
 
 
-const token = req.params.token;
+    const token = req.params.token;
     const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiration: { $gt: Date.now() }
+        resetToken: token,
+        resetTokenExpiration: {
+            $gt: Date.now()
+        }
     });
-    if(!user){
-          return renderTemplate(res, req, "auth/forgot.ejs",{
-     alert: `Invalid Reset token was provided..`,
-    });
-      
+    if (!user) {
+        return renderTemplate(res, req, "auth/forgot.ejs", {
+            alert: `Invalid Reset token was provided..`,
+        });
+
     } else {
-   return renderTemplate(res, req, "auth/newpass.ejs",{
-      alert: null,
-      userId: user._id.toString(),
-      passwordToken: token
-    });
+        return renderTemplate(res, req, "auth/newpass.ejs", {
+            alert: null,
+            userId: user._id.toString(),
+            passwordToken: token
+        });
     }
- });
+});
 
 
 
 
+app.get("/forgot", function(req, res) {
 
- app.get("/forgot", function(req, res) {
-
-return renderTemplate(res, req, "auth/forgot.ejs",{
-      alert: null,
+    return renderTemplate(res, req, "auth/forgot.ejs", {
+        alert: null,
     });
- });
+});
 
- app.get("/logout", function(req, res) {
+app.get("/logout", function(req, res) {
 
-req.session.destroy(err => {
-    res.redirect('/');
-  });
+    req.session.destroy(err => {
+        res.redirect('/');
+    });
 
- });
-
-
-
- app.get("/", async(req, res) => {
-
-
-  renderTemplate(res, req, "index.ejs",{
-  });
-
- });
+});
 
 
 
-  app.get("/products", async(req, res) => {
-  
-  return res.send('The current feature is under development!')
-  
-  });
+app.get("/", async (req, res) => {
 
 
-   app.post("/products", async(req, res) => {
-   return res.send('The current feature is under development!')
+    renderTemplate(res, req, "index.ejs", {});
 
- });
+});
 
 
- app.get("*", async(req, res) => {
-  renderTemplate(res, req, "other/404.ejs",{
-  });
 
- });
+app.get("/products", async (req, res) => {
+
+    return res.send('The current feature is under development!')
+
+});
+
+
+app.post("/products", async (req, res) => {
+    return res.send('The current feature is under development!')
+
+});
+
+
+app.get("*", async (req, res) => {
+    renderTemplate(res, req, "other/404.ejs", {});
+
+});
 
 const dbOptions = {
-      keepAlive: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-    };
+    keepAlive: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+};
 
-    mongoose.connect(process.env.mongo, dbOptions)
+mongoose.connect(process.env.mongo, dbOptions)
 
- app.listen(process.env.PORT || 5000, () => console.log(`Running Website!`));
+app.listen(process.env.PORT || 5003, () => console.log(`Running Website!`));
 
 function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
-

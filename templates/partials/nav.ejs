@@ -13,7 +13,11 @@
  <li ><a id="purple" class="nav_menu" href="https://<%= hostname %>/contact"rel="noopener">Contact</a></li>
  <% } %>
  <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/products" rel="noopener">Products</a></li>
- <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/about" rel="noopener">About</a></li>
+ <%  if (path !== "/about") { %>
+ <li><a id="purple" class="nav_menu" href="https://<%= hostname %>/about" rel="noopener">About</a></li>
+<% } else { %>
+ <li><a  id="purple" class="nav_menu" href="https://<%= hostname %>/contact" rel="noopener">Contact</a></li>
+<% } %>
 <% if(user) { %>
 <% if (user.profile.image) {
 avatar = `/${user.profile.image}`

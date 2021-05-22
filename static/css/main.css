@@ -12,7 +12,7 @@
 }
 
 .home-top {
-background: url('https://ecoplug.xyz/home/banner.png') no-repeat 100% 100%;
+background: url('https://ecoplug.xyz/home/banner_dark.png') no-repeat 100% 100%;
 background-size: cover;
 position: relative;
 }
@@ -28,7 +28,13 @@ padding-top: 10px;
 padding-left: 10%;
 padding-right: 10%;
 }
-
+.text-center{
+cursor:pointer;
+pointer-events: auto;
+}
+#home-text:hover{
+background-color:#443f3f
+}
 #new-bots-color{
 background: #2f2f2f;
 border-radius: 5px;

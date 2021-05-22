@@ -244,14 +244,6 @@ margin-right: auto;
 }
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
 
-.home-top{
-background: url('./home/banner.png') no-repeat 100% 100%;
-background-size: cover;
-background-image: linear-gradient(to bottom right, #bc2bff, #7249fb);
-background-color: #4f37ac;
-position: relative;
-}
-
 
 
 .home-top .wave {
@@ -446,7 +438,7 @@ color: red
 
 
 .nav li .nav-menu-button:hover{
-  background-color: #68BF79;
+  background-color: rgb(71, 134, 83);
 }
 
 .nav li .nav-menu-button i {
