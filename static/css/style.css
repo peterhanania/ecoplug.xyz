@@ -814,6 +814,10 @@ svg {
 fill: var(--svg);
 margin: 0px 10px;
 }
+i {
+fill: var(--svg);
+margin: 0px 10px;
+}
 
 .logout svg {
 fill: rgb(var(--logout));

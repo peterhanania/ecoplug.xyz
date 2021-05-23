@@ -162,6 +162,13 @@ app.use(async (req, res, next) => {
     }
 });
 
+app.get("/add", checkAuth, function(req, res) {
+
+      renderTemplate(res, req, "products/add.ejs", {
+        alert: null,
+    });
+
+});
 
 
 app.get("/login", (req, res, next) => {
@@ -515,7 +522,7 @@ app.post(
         };
 
         const validateUsernameDatabase = await User.findOne({
-            username: username
+            username: username.toLowerCase()
         });
 
         if (validateUsernameDatabase) {
@@ -526,7 +533,7 @@ app.post(
         }
 
         const validateEmailDatabase = await User.findOne({
-            email: email
+            email: email.toLowerCase()
         });
 
         if (validateEmailDatabase) {
@@ -545,9 +552,9 @@ app.post(
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = new User({
-            email: email.split(" ").join(""),
+            email: email.split(" ").join("").toLowerCase(),
             password: hashedPassword,
-            username: username.split(" ").join(""),
+            username: username.split(" ").join("").toLowerCase(),
             joinedAt: Date.now()
         });
         await user.save();
@@ -786,7 +793,7 @@ app.post(
         try {
 
             const user = await User.findOne({
-                email: email
+                email: email.toLowerCase()
             });
             if (!user) {
                 return renderTemplate(res, req, "auth/login.ejs", {
@@ -845,7 +852,7 @@ app.post(
 
 
         const user = await User.findOne({
-            email: email
+            email: email.toLowerCase()
         });
         if (!user) {
             return renderTemplate(res, req, "auth/forgot.ejs", {
@@ -1018,14 +1025,7 @@ app.post(
             _id: userId
         });
 
-          if (req.user && req.user.email === user.email) {
-          renderTemplate(res, req, "auth/newpass.ejs", {
-                alert: `You are already logged in as ${req.user.username}!`,
-          });
-          return;
-        };
-
-
+         
         resetUser = user;
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         resetUser.password = hashedPassword;
