@@ -941,6 +941,7 @@ background-clip: padding-box;
 
 ::-webkit-scrollbar-thumb:hover {
 background-color: var(--scrollbar-hover);
+cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:active {

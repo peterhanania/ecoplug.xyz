@@ -48,5 +48,6 @@ footer {
 }
 footer p{
   padding: 10px;
-  background-color: #2f2f2f
+  background-color: #2f2f2f;
+  color: #fff !important;
 }
