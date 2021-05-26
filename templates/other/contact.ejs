@@ -11,8 +11,8 @@
                 <form method="post" action="/contact" class="contact-form validate-form">
                     
                     <% if(alert) { %>
-                    <span class="contact-form-title">Response Recieved</span>
-                    <p>Your response was recieved. You will be emailed by our team regarding your message.</p>
+                    <span class="contact-form-title">Response Receieved</span>
+                    <p>Your response was received. You will be emailed by our team regarding your message.</p>
                     <% } else { %>
                     <span class="contact-form-title">Contact Us</span>
                     <div class="wrap-input rs1-wrap-input">
@@ -27,7 +27,7 @@
                     </div>
                     <div class="wrap-input">
                         <span class="label">Message</span>
-                        <textarea class="input" name="message" placeholder="Your Message"></textarea>
+                        <textarea class="input" name="message" placeholder="Your Message" required></textarea>
                         <span class="input-line"></span>
                     </div>
                   

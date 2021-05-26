@@ -1,11 +1,25 @@
 
-const mainImage = document.getElementById("main_image_hidden").value;
 
 function changeImage() {
     document.getElementById("form").submit();
 };
 
+function resetImage() {
+    fetch(`/profile/change_profile_picture`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'reset'})
+        }).then(res => res.text()).then(res => {
+                if (res) {
+                  if(res === "refresh") return window.location.href="/profile"
+                  document.getElementById("hidden").innerHTML = res;
+                  document.getElementById("hidden").style.display = "block";
 
+                }
+            })
+};
+
+/*
 $(function() {
   $(".image").attr("src", mainImage)
     .mouseover(function() { 
@@ -15,8 +29,9 @@ $(function() {
         $(this).attr("src", mainImage); 
     });
  });
+ */
 
- function notifications() {
+function notifications() {
 let noti1 = document.getElementById("jg1");
 let noti2 = document.getElementById("jg2");
 let noti3 = document.getElementById("jg3");

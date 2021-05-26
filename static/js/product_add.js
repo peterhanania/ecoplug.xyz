@@ -12,9 +12,17 @@ if(check.checked == false) {
 } else {
 document.getElementById("step1").style.display = "none";
 document.getElementById("step2").style.display = "block";
-
-
+AOS.init();
 }
 
 };
 
+$("input[type='radio']").change(function() {
+                if ($(this).val() == "other") {
+                    $("#otherAnswer").show();
+                } else {
+                    $("#otherAnswer").hide();
+                }
+            });
+
+            

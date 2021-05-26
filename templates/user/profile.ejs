@@ -16,16 +16,21 @@
 	</div>
 	<div class="profile-container">
 		<div class="wrap-container">
+     <div class="alert-validate"  id="hidden"></div>
      <% if(alert) { %><div class="alert-validate"><%= alert %></div><% } %>
 			<form action="/profile/change_profile_picture" class="contact-form validate-form" enctype="multipart/form-data" id="form" method="post" name="form" role="form">
 				<div class="main_profile">
-					<label><input id="image" name="image" onchange="changeImage()" style="display: none;" type="file"><img class="image" id="image" src="/images/unknown_user.png"></label>
+        <img class="image" id="image" src="<%= user.profile.image ?  `/${user.profile.image}`: "/images/unknown_user.png" %>">
+        <div class="middle">
+        <div class="text"><label class="label">Upload Image<input id="image" name="image" onchange="changeImage()" style="display: none;" type="file"></input></label><%- user.profile.image ?  `<br><a style="color: red"  onclick="resetImage()">Reset Image</a>`: "" %></div>
+      
+        </div>
 					<h1><%= user.username %> - Profile Settings</h1>
 					<p>Update Your profile and notification settings</p>
 				</div>
 			</form>
 			<div class="info_box">
-				<input type="text" id="main_image_hidden" value="<%= user.profile.image ?  `/${user.profile.image}`: "/images/unknown_user.png" %>" style="display: none"/>
+
 				<div class="title">
 					<h2>Profile Information</h2>
 				</div>

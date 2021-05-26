@@ -266,7 +266,7 @@ app.post("/profile/notification_settings", checkAuth, async (req, res, next) => 
 
 
 app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) => {
-
+    
 
     const user = await User.findOne({
         email: req.user.email
@@ -274,8 +274,8 @@ app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) =>
 
     if (user) {
 
-
-        if (req && req.file && req.file.path) {
+        
+        if (req && req.file && req.file.path && req.body.type !== "reset") {
             if (user.profile.image) {
                 await deleteFile(user.profile.image)
             };
@@ -286,6 +286,18 @@ app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) =>
                 alert: null,
             });
         };
+
+        if(req && req.body.type === "reset"){
+          if (user.profile.image) {
+                await deleteFile(user.profile.image);
+                user.profile.image = null;
+                await user.save();
+
+                return  res.status(400).send('refresh');
+          } else {
+           return res.status(400).send('You do not have an existing profile picture.');
+          }
+        }
 
 
 
