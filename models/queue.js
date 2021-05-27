@@ -33,6 +33,12 @@ const userSchema = new Schema({
     default: null
   },
 
+  summary: {
+    type: String,
+    default: null
+  },
+
+
   target_customers: {
     type: String,
     default: null

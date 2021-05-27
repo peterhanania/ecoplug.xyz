@@ -22,7 +22,7 @@
 				<div class="main_profile">
         <img class="image" id="image" src="<%= user.profile.image ?  `/${user.profile.image}`: "/images/unknown_user.png" %>">
         <div class="middle">
-        <div class="text"><label class="label">Upload Image<input id="image" name="image" onchange="changeImage()" style="display: none;" type="file"></input></label><%- user.profile.image ?  `<br><a style="color: red"  onclick="resetImage()">Reset Image</a>`: "" %></div>
+        <div class="text"><label class="label">Upload Image<input id="image" name="image" onchange="changeImage()" style="display: none;" type="file"></input></label><%- user.profile.image ?  `<br><a onclick="resetImage()">Reset Image</a>`: "" %></div>
       
         </div>
 					<h1><%= user.username %> - Profile Settings</h1>

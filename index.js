@@ -83,9 +83,11 @@ app.use(session({
 var moment = require('moment');
 app.locals.moment = require('moment');
 
-app.use(bodyParser.json());
+app.use( bodyParser.json({limit: '50mb'}) );
 app.use(bodyParser.urlencoded({
-    extended: true
+  limit: '50mb',
+  extended: true,
+  parameterLimit:50000
 }));
 app.use(
 
@@ -177,7 +179,18 @@ app.get("/add", checkAuth, function(req, res) {
 });
 
 
-app.post("/add", checkAuth, async function(req, res) {
+app.post("/add", 
+checkAuth, 
+body('summary').isLength({
+        min: 15,
+        max: 130
+    }).withMessage('Please provide a Summary between 15 and 130 characters'),
+body('what_does_it_do').isLength({
+        min: 50,
+        max: 2000
+    }).withMessage('Please provide a description between 50 to 2000 characters'),
+
+async function(req, res) {
 
     const user = await User.findOne({
         email: req.user.email
@@ -198,6 +211,26 @@ app.post("/add", checkAuth, async function(req, res) {
         let how_are_they_helping;
         let picture_links;
         let categories;
+        let summary;
+
+        const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return renderTemplate(res, req, "products/add.ejs", {
+                    alert: errors.array()[0].msg,
+                });
+            };
+
+
+        if(data.summary){
+
+          summary = data.summary
+          
+        } else {
+          
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Please provide a product Summary!`,
+            });
+        }
 
         if (data.name) {
 
@@ -392,9 +425,6 @@ app.post("/add", checkAuth, async function(req, res) {
 
         try {
 
-            console.log(other)
-            console.log(display_adress)
-
             await Queue.create({
                 user: {
                     username: user.username,
@@ -412,9 +442,10 @@ app.post("/add", checkAuth, async function(req, res) {
                         same: display_adress === "another" ? "false" : "true",
                         other: other ? other : null
                     },
-
+  
                     how_are_they_helping: how_are_they_helping,
                     picture_links: picture_links,
+                    summary: summary,
                     categories: categories,
 
                 },
@@ -622,6 +653,17 @@ app.get("/login", (req, res, next) => {
 
 });
 
+
+app.post("/webhook", (req, res, next) => {
+  
+  if(req.body.domain_id === process.env.domain_id){
+  admin_discord_webhook.send(`**Action:** ${req.body.data.type}\n${req.body.data.email.subject} - ${req.body.data.email.status}\n\n*${req.body.data.email.recipient.email}*`)
+  }
+
+
+
+});
+
 app.get("/about", (req, res, next) => {
 
     renderTemplate(res, req, "other/about.ejs", {
@@ -639,8 +681,16 @@ app.get("/contact", checkAuth, (req, res, next) => {
 
 
 app.post("/contact", checkAuth, (req, res, next) => {
+    
 
 
+    if(!req.user) return;
+    if(!req.body.message) return;
+    if(!req.body.message.length) return;
+    if(req.body.message.split(" ").join("").length < 1 ) return;
+
+    admin_discord_webhook.send(`<@710465231779790849>`)
+    admin_discord_webhook.send(new Discord.MessageEmbed().setDescription(`**A new user contacted Us:**\n\n${req.user.email}\n${req.user.username}\n\n**${req.body.message}**`).setColor('GREEN'))
     renderTemplate(res, req, "other/contact.ejs", {
         alert: `Submitted`,
     });
@@ -1575,6 +1625,7 @@ app.post('/products/queue/:id', checkAuth, async function(req, res) {
                             how_are_they_helping: product.product.how_are_they_helping,
 
                             picture_links: product.product.picture_links,
+                            summary: product.product.summary,
 
                             categories: product.product.categories,
 
@@ -2007,7 +2058,7 @@ const dbOptions = {
 
 mongoose.connect(process.env.mongo, dbOptions)
 
-app.listen(process.env.PORT || 5003, () => console.log(`Running Website!`));
+app.listen(process.env.PORT || 5004, () => console.log(`Running Website!`));
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

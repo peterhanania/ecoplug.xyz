@@ -46,7 +46,15 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">2-	What does your product do? (Will be displayed on Website)</span>
-                    <textarea class="input" name="what_does_it_do" placeholder="Your Answer" required></textarea>
+                    <textarea minlength="50" maxlength="2000" class="input" name="what_does_it_do" placeholder="Your Answer" required></textarea>
+                    <span class="input-line"></span>
+                    </div>
+                    </div>
+
+                     <div data-aos="fade-left">
+                    <div class="wrap-input">
+                    <span class="label">3-	Provide Us with a short summary of Your product. (Will be displayed on Website)</span>
+                    <textarea minlength="15" maxlength="130" class="input" name="summary" placeholder="Your Answer" required></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -54,7 +62,7 @@
                      
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">3- How much of your products are available to sell?<span>
+                    <span class="label">4- How much of your products are available to sell?<span>
                     <textarea class="input" name="quantity" placeholder="Your Answer" required></textarea>
                     <span class="input-line"></span>
                     </div>
@@ -62,7 +70,7 @@
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">4-	Who are your target customers?<span>
+                    <span class="label">5-	Who are your target customers?<span>
                     <div style="padding-top: 9px"></div>
                     <input type="radio" name="target_customers" id="1" value="13-" required/>
                     <label for="1">Children up to age 12 (13-)</label><br>
@@ -78,7 +86,7 @@
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">5-	Please provide us a publicly available link showing your Product. (This may be a website/social media link or other public information)<span>
+                    <span class="label">6-	Please provide us a publicly available link showing your Product. (This may be a website/social media link or other public information peaop;e will click to check your website out)<span>
                     <textarea class="input" name="link" placeholder="Your Answer" required></textarea>
                     <span class="input-line"></span>
                     </div>
@@ -86,7 +94,7 @@
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">6-	Would you like us to display your account email adress or another? (to contact customers - Will be also displayed on Site)<span>
+                    <span class="label">7-	Would you like us to display your account email adress or another? (to contact customers - Will be also displayed on Site)<span>
                     <div style="padding-top: 9px"></div>
                     <input type="radio" name="display_adress" value="same" id="5" required/>
                     <label for="5">Same</label><br>
@@ -99,7 +107,7 @@
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">7-	How are your products helping the environment? What are they made of?<span>
+                    <span class="label">8-	How are your products helping the environment? What are they made of?<span>
                     <textarea class="input" name="how_are_they_helping" placeholder="Your Answer" required></textarea>
                     <span class="input-line"></span>
                     </div>
@@ -107,7 +115,7 @@
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">8-	Please provide us with some picture links of your product.<span>
+                    <span class="label">9-	Please provide us with some picture links of your product.<span>
                     <textarea class="input" name="picture_links" placeholder="Your Answer" required></textarea>
                     <span class="input-line"></span>
                     </div>
@@ -116,7 +124,7 @@
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
-                    <span class="label">9. Product Categories<span>
+                    <span class="label">10- Product Categories<span>
                     <select name="categories[]" multiple="multiple" class="3col active">
                     <% const list = ["Accessories", "Animal Waste", "Bamboo", "Bin", "Bin Liners", "Biodegradable", "Bioplastic", "Bottles", "Bowls", "Clothing", "Computer", "Computer Accessories", "Cup", "Decking", "Fabric", "Fish", "Floor Mats", "Foil", "Footwear", "Laptop", "Neoprene", "Plates", "Reclaimed Wood", "Recycled", "Reusable", "Rugs", "Steel", "Toilet Tissue", "Toothbrush", "Towel"] %>
                     <% list.forEach((l)=>{ %>

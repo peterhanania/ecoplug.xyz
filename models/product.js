@@ -27,6 +27,10 @@ const userSchema = new Schema({
     type: String,
     default: null
   },
+  summary: {
+    type: String,
+    default: null
+  },
 
   quantity: {
     type: String,

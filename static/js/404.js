@@ -31,7 +31,7 @@ function draw() {
     let h = (Date.now() / 10) % 360;
     ctx.fillStyle = `hsla(${h}, 100%, 50%, 1)`;
   } else {
-    ctx.fillStyle = '#7289DA';
+    ctx.fillStyle = '#222222';
   }
   ctx.fillRect(0, 0, cnvs.width, cnvs.height);
 
