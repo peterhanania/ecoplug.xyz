@@ -29,20 +29,23 @@ const multer = require("multer");
 const Recipient = require("mailersend").Recipient;
 const EmailParams = require("mailersend").EmailParams;
 const MailerSend = require("mailersend");
-
+const Queue = require('./models/queue');
+const Discord = require('discord.js');
+const Product = require('./models/product')
+const admin_discord_webhook = new Discord.WebhookClient(process.env.webhook_id, process.env.webhook_url);
 
 function isFile(pathItem) {
-try{
+    try {
 
-fs.lstatSync(pathItem).isDirectory();
+        fs.lstatSync(pathItem).isDirectory();
 
-}catch(e){
-   if(e.code == 'ENOENT'){
-     return false;
-   } else {
-     return true;
-   }
-}
+    } catch (e) {
+        if (e.code == 'ENOENT') {
+            return false;
+        } else {
+            return true;
+        }
+    }
 };
 
 const mailersend = new MailerSend({
@@ -50,16 +53,16 @@ const mailersend = new MailerSend({
 });
 
 const deleteFile = filePath => {
-    try{
-    if(typeof(isFile(filePath)) === "undefined" || isFile(filePath)){
-    fs.unlink(filePath, err => {
-        if (err) {
-            throw err;
-        }
-    });  
-    };
+    try {
+        if (typeof(isFile(filePath)) === "undefined" || isFile(filePath)) {
+            fs.unlink(filePath, err => {
+                if (err) {
+                    throw err;
+                }
+            });
+        };
     } catch (error) {
-      throw error;
+        throw error;
     }
 };
 
@@ -155,8 +158,11 @@ app.use(async (req, res, next) => {
         };
         const doMatch = user.password === req.session.user.password;
         if (!doMatch) return next();
+        if (user.disabled) {
+            return next()
+        }
         req.user = user;
-        next();
+        return next();
     } catch (err) {
         next(new Error(err));
     }
@@ -164,9 +170,437 @@ app.use(async (req, res, next) => {
 
 app.get("/add", checkAuth, function(req, res) {
 
-      renderTemplate(res, req, "products/add.ejs", {
+    renderTemplate(res, req, "products/add.ejs", {
         alert: null,
     });
+
+});
+
+
+app.post("/add", checkAuth, async function(req, res) {
+
+    const user = await User.findOne({
+        email: req.user.email
+    });
+
+    if (user) {
+
+        const data = req.body;
+
+
+        let name;
+        let what_does_it_do;
+        let quantity;
+        let target_customers;
+        let link;
+        let display_adress;
+        let other;
+        let how_are_they_helping;
+        let picture_links;
+        let categories;
+
+        if (data.name) {
+
+            name = data.name
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Please provide a product Name!`,
+            });
+
+        };
+
+
+        if (data.what_does_it_do) {
+
+            what_does_it_do = data.what_does_it_do
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `What does your product do?`,
+            });
+
+        };
+
+        if (data.quantity) {
+
+            quantity = data.quantity
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `How much of your products are available to sell?`,
+            });
+
+        };
+
+
+        if (data.target_customers) {
+
+            const target_customers_choices = ["13-", "13-18", "18+", "all"];
+
+            if (target_customers_choices.includes(data.target_customers)) {
+                target_customers = data.target_customers
+            } else {
+
+                return renderTemplate(res, req, "products/add.ejs", {
+                    alert: `Invalid target customer choice`,
+                });
+
+            };
+
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Who are your target customers?`,
+            });
+
+        };
+
+
+
+        if (data.link) {
+
+            link = data.link;
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Please provide your public link.`,
+            });
+
+        };
+
+
+
+        if (data.display_adress) {
+
+            if (data.display_adress === "same") {
+                display_adress = "same"
+            } else if (data.display_adress === "another") {
+                display_adress = "another";
+
+                if (data.other) {
+
+                    other = data.other;
+
+                } else {
+
+                    return renderTemplate(res, req, "products/add.ejs", {
+                        alert: `Provide the other company email`,
+                    });
+
+                };
+
+            } else {
+                return renderTemplate(res, req, "products/add.ejs", {
+                    alert: `Would you like us to display your account email adress or another?`,
+                });
+
+            }
+
+
+        } else {
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Would you like us to display your account email adress or another?`,
+            });
+
+        };
+
+
+        if (data.how_are_they_helping) {
+
+            how_are_they_helping = data.how_are_they_helping;
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `How are your products helping the environment? What are they made of?`,
+            });
+
+        };
+
+        if (data.picture_links) {
+
+            picture_links = data.picture_links;
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Please provide us with some picture links of your product.`,
+            });
+
+        };
+
+
+        if (data.categories) {
+
+            const categories_all = ["accessories", "animal_waste", "bamboo", "bin", "bin_liners", "biodegradable", "bioplastic", "bottles", "bowls", "clothing", "computer", "computer_accessories", "cup", "decking", "fabric", "fish", "floor_mats", "foil", "footwear", "laptop", "neoprene", "plates", "reclaimed_wood", "recycled", "reusable", "rugs", "steel", "toilet_tissue", "toothbrush", "towel"]
+
+            data.categories.forEach(async (category) => {
+                if (!categories_all.includes(category)) {
+                    await renderTemplate(res, req, "products/add.ejs", {
+                        alert: `Maximum category limit reached!`,
+                    });
+                    return;
+                }
+            });
+
+            if (data.categories.length >= 6) {
+                return renderTemplate(res, req, "products/add.ejs", {
+                    alert: `Invalid category!`,
+                });
+            };
+
+            if (!data.categories.length || data.categories.length < 1) {
+                return renderTemplate(res, req, "products/add.ejs", {
+                    alert: `Please provide atleast 1 category!`,
+                });
+            };
+
+            categories = data.categories;
+
+        } else {
+
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `Please provide us with atleast one product category!`,
+            });
+
+        };
+
+        const check_queue = await Queue.findOne({
+            user: {
+                username: user.username,
+                id: user._id.toString()
+            }
+        });
+
+        if (check_queue) {
+            return renderTemplate(res, req, "products/add.ejs", {
+                alert: `You already Submitted a product! Please check your email`,
+            });
+        }
+
+
+        let queue = 1;
+        const queue_products = await Queue.find();
+        if (queue_products && queue_products.length) queue = queue_products.length + 1;
+
+
+        try {
+
+            console.log(other)
+            console.log(display_adress)
+
+            await Queue.create({
+                user: {
+                    username: user.username,
+                    id: user._id.toString()
+                },
+
+                product: {
+
+                    name: name,
+                    what_does_it_do: what_does_it_do,
+                    quantity: quantity,
+                    target_customers: target_customers,
+                    link: link,
+                    display_adress: {
+                        same: display_adress === "another" ? "false" : "true",
+                        other: other ? other : null
+                    },
+
+                    how_are_they_helping: how_are_they_helping,
+                    picture_links: picture_links,
+                    categories: categories,
+
+                },
+
+
+                queue: queue
+            });
+
+        } catch (error) {
+            admin_discord_webhook.send(`<@710465231779790849>\n\n${error}`);
+            console.log(error);
+            renderTemplate(res, req, "products/add.ejs", {
+                alert: `An error has occured. Please retry adding your product.`,
+            });
+            return
+        }
+
+        try {
+
+
+            const recipients = [new Recipient(user.email, user.username)];
+
+            const emailParams = new EmailParams()
+                .setFrom("support@ecoplug.xyz")
+                .setFromName("Ecoplug")
+                .setRecipients(recipients)
+                .setSubject(`${user.username} |  Product Added`)
+                .setHtml(`
+                <!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <!--[if !mso]><!-->
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Inter:400,600');
+    </style>
+    <!--<![endif]-->
+
+    <style type="text/css" rel="stylesheet" media="all">
+        @media only screen and (max-width: 640px) {
+
+            .ms-header {
+                display: none !important;
+            }
+            .ms-content {
+                width: 100% !important;
+                border-radius: 0;
+            }
+            .ms-content-body {
+                padding: 30px !important;
+            }
+            .ms-footer {
+                width: 100% !important;
+            }
+            .mobile-wide {
+                width: 100% !important;
+            }
+            .info-lg {
+                padding: 30px;
+            }
+        }
+    </style>
+    <!--[if mso]>
+    <style type="text/css">
+    body { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td * { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td p { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td a { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td span { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td div { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td ul li { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td ol li { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td blockquote { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    th * { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    </style>
+    <![endif]-->
+</head>
+<body style="font-family:'Inter', Helvetica, Arial, sans-serif; width: 100% !important; height: 100%; margin: 0; padding: 0; -webkit-text-size-adjust: none; background-color: #f4f7fa; color: #4a5566;" >
+
+<div class="preheader" style="display:none !important;visibility:hidden;mso-hide:all;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;" ></div>
+
+<table class="ms-body" width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;background-color:#f4f7fa;width:100%;margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;" >
+    <tr>
+        <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+            <table class="ms-container" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;" >
+                <tr>
+                    <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                        <table class="ms-header" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;" >
+                            <tr>
+                                <td height="40" style="font-size:0px;line-height:0px;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                        <table class="ms-content" width="640" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;width:640px;margin-top:0;margin-bottom:0;margin-right:auto;margin-left:auto;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;background-color:#FFFFFF;border-radius:6px;box-shadow:0 3px 6px 0 rgba(0,0,0,.05);" >
+                            <tr>
+                                <td class="ms-content-body" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;padding-top:40px;padding-bottom:40px;padding-right:50px;padding-left:50px;" >
+
+                                    <p class="logo" style="margin-right:0;margin-left:0;line-height:28px;font-weight:600;font-size:21px;color:#111111;text-align:center;margin-top:0;margin-bottom:40px;" ><span style="color:#0052e2;font-family:Arial, Helvetica, sans-serif;font-size:30px;vertical-align:bottom;" ><img style="height: 20px; width: 20px;"src="https://ecoplug.xyz/logo.png" />&nbsp;</span>Ecoplug</p>
+
+                                    <h1 style="margin-top:0;color:#111111;font-size:24px;line-height:36px;font-weight:600;margin-bottom:24px;" >Product Submitted</h1>
+
+                                    <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;" >Hey ${user.username} your product has been submitted, and you will be notified once judged! Your product is currently #${queue} in the queue.</p>
+                                    <table width="100%" align="center" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;" >
+                                        <tr>
+                                            <td align="center" style="padding-top:20px;padding-bottom:20px;padding-right:0;padding-left:0;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                                                <table class="mobile-wide" border="0" cellspacing="0" cellpadding="0" role="presentation" style="border-collapse:collapse;" >
+                                                    <tr>
+                                                        <td align="center" class="btn" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;background-color:#0052e2;box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);border-radius:3px;" >
+                                                            <a href="https://ecoplug.xyz/" target="_blank" style="background-color:#0052e2;padding-top:14px;padding-bottom:14px;padding-right:30px;padding-left:30px;display:inline-block;color:#FFF;text-decoration:none;border-radius:3px;-webkit-text-size-adjust:none;box-sizing:border-box;border-width:0px;border-style:solid;border-color:#0052e2;font-weight:600;font-size:15px;line-height:21px;letter-spacing:0.25px;" >Go back Home</a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    
+
+                                    <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;" ><b>Cheers,</b>
+                                        <br>The Ecoplug Team!</p>
+
+                              
+
+                                    <table width="100%" style="border-collapse:collapse;" >
+                                        <tr>
+                                            <td height="20" style="font-size:0px;line-height:0px;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td height="20" style="font-size:0px;line-height:0px;border-top-width:1px;border-top-style:solid;border-top-color:#e2e8f0;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p class="small" style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:14px;line-height:21px;" >Not you? Change and reset your password<a href="https://ecoplug.xyz/forgot/"> by clicking here</a>.</p>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
+`)
+                .setText(`Product Added | ${user.username}`);
+            //   await mailersend.send(emailParams);
+        } catch (error) {
+            admin_discord_webhook.send(`<@710465231779790849>\n\n${error}`);
+            console.log(error)
+            renderTemplate(res, req, "products/add.ejs", {
+                alert: `An error has occured. We couldn't email you.`,
+            });
+            return;
+        }
+
+        admin_discord_webhook.send(`<@710465231779790849>\n\nA new Product has been submitted!\n\n**User information:**\n${user.username}\n${user.email}\n\n**Product Information:**\n${name}\n---------------------`);
+        return renderTemplate(res, req, "products/add.ejs", {
+            alert: `Your product has been Submitted! Check your email for more information.`,
+        });
+
+    }
 
 });
 
@@ -266,7 +700,7 @@ app.post("/profile/notification_settings", checkAuth, async (req, res, next) => 
 
 
 app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) => {
-    
+
 
     const user = await User.findOne({
         email: req.user.email
@@ -274,7 +708,7 @@ app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) =>
 
     if (user) {
 
-        
+
         if (req && req.file && req.file.path && req.body.type !== "reset") {
             if (user.profile.image) {
                 await deleteFile(user.profile.image)
@@ -287,16 +721,16 @@ app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) =>
             });
         };
 
-        if(req && req.body.type === "reset"){
-          if (user.profile.image) {
+        if (req && req.body.type === "reset") {
+            if (user.profile.image) {
                 await deleteFile(user.profile.image);
                 user.profile.image = null;
                 await user.save();
 
-                return  res.status(400).send('refresh');
-          } else {
-           return res.status(400).send('You do not have an existing profile picture.');
-          }
+                return res.status(400).send('refresh');
+            } else {
+                return res.status(400).send('You do not have an existing profile picture.');
+            }
         }
 
 
@@ -470,7 +904,8 @@ app.post("/profile/change_password",
                         mailersend.send(emailParams);
                     }
                 } catch (error) {
-                    return
+
+                    return;
                 }
 
 
@@ -1037,7 +1472,7 @@ app.post(
             _id: userId
         });
 
-         
+
         resetUser = user;
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         resetUser.password = hashedPassword;
@@ -1051,6 +1486,445 @@ app.post(
         });
     },
 );
+
+app.get('/products/queue/:id', checkAuth, async function(req, res) {
+    try {
+
+        const user = await User.findOne({
+            email: req.user.email.toLowerCase()
+        });
+
+        if (user.admin) {
+            const id = req.params.id;
+
+            const product = await Queue.findOne({
+                queue: id
+            });
+
+            if (!product) {
+                return res.send(`Invalid Queue`)
+            };
+
+            return renderTemplate(res, req, "products/queue.ejs", {
+                alert: `Found! User: ${product.user.username}`,
+                product: product
+            });
+        } else {
+            res.send(`You do not have permission to view this page`)
+        }
+    } catch {
+        return res.send(`Invalid Queue`)
+    }
+});
+
+app.post('/products/queue/:id', checkAuth, async function(req, res) {
+    try {
+
+        const user = await User.findOne({
+            email: req.user.email.toLowerCase()
+        });
+
+        if (user.admin) {
+            const id = req.params.id;
+
+            const product = await Queue.findOne({
+                queue: id
+            });
+
+            const product_user = await User.findOne({
+                username: product.user.username,
+                _id: product.user.id
+            });
+            if (!product_user) return res.send(`Couldn't find this user`);
+
+            if (req.body.type === "approve") {
+
+
+                try {
+
+
+                    const recipients = [new Recipient(product_user.email, product_user.username)];
+
+
+
+                    const new_Product = await Product.create({
+                        user: {
+
+                            username: product_user.username,
+                            id: product_user.id,
+
+                        },
+
+                        product: {
+
+                            name: product.product.name,
+
+                            what_does_it_do: product.product.what_does_it_do,
+
+                            quantity: product.product.quantity,
+
+                            target_customers: product.product.target_customers,
+
+                            link: product.product.link,
+
+                            display_adress: {
+                                same: product.product.same,
+                                other: product.product.other ? product.product.other : null
+                            },
+
+                            how_are_they_helping: product.product.how_are_they_helping,
+
+                            picture_links: product.product.picture_links,
+
+                            categories: product.product.categories,
+
+
+                        },
+                    });
+
+                    admin_discord_webhook.send(`<@710465231779790849>\n\nApproved Product\nhttps://ecoplug.xyz/products/${new_Product._id}`);
+
+                    const emailParams = new EmailParams()
+                        .setFrom("support@ecoplug.xyz")
+                        .setFromName("Ecoplug")
+                        .setRecipients(recipients)
+                        .setSubject(`${product_user.username} |  Product Approved!!`)
+                        .setHtml(`<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <!--[if !mso]><!-->
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Inter:400,600');
+    </style>
+    <!--<![endif]-->
+
+    <style type="text/css" rel="stylesheet" media="all">
+        @media only screen and (max-width: 640px) {
+
+            .ms-header {
+                display: none !important;
+            }
+            .ms-content {
+                width: 100% !important;
+                border-radius: 0;
+            }
+            .ms-content-body {
+                padding: 30px !important;
+            }
+            .ms-footer {
+                width: 100% !important;
+            }
+            .mobile-wide {
+                width: 100% !important;
+            }
+            .info-lg {
+                padding: 30px;
+            }
+        }
+    </style>
+    <!--[if mso]>
+    <style type="text/css">
+    body { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td * { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td p { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td a { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td span { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td div { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td ul li { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td ol li { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td blockquote { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    th * { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    </style>
+    <![endif]-->
+</head>
+<body style="font-family:'Inter', Helvetica, Arial, sans-serif; width: 100% !important; height: 100%; margin: 0; padding: 0; -webkit-text-size-adjust: none; background-color: #f4f7fa; color: #4a5566;" >
+
+<div class="preheader" style="display:none !important;visibility:hidden;mso-hide:all;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;" ></div>
+
+<table class="ms-body" width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;background-color:#f4f7fa;width:100%;margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;" >
+    <tr>
+        <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+            <table class="ms-container" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;" >
+                <tr>
+                    <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                        <table class="ms-header" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;" >
+                            <tr>
+                                <td height="40" style="font-size:0px;line-height:0px;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                        <table class="ms-content" width="640" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;width:640px;margin-top:0;margin-bottom:0;margin-right:auto;margin-left:auto;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;background-color:#FFFFFF;border-radius:6px;box-shadow:0 3px 6px 0 rgba(0,0,0,.05);" >
+                            <tr>
+                                <td class="ms-content-body" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;padding-top:40px;padding-bottom:40px;padding-right:50px;padding-left:50px;" >
+
+                                    <p class="logo" style="margin-right:0;margin-left:0;line-height:28px;font-weight:600;font-size:21px;color:#111111;text-align:center;margin-top:0;margin-bottom:40px;" ><span style="color:red;font-family:Arial, Helvetica, sans-serif;font-size:30px;vertical-align:bottom;" ><img style="height: 20px; width: 20px;"src="https://ecoplug.xyz/logo.png" />&nbsp;</span>Ecoplug</p>
+
+                                    <h1 style="margin-top:0;color:#111111;font-size:24px;line-height:36px;font-weight:600;margin-bottom:24px;" >Product Approved!</h1>
+
+                                    <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;" >Hey ${product_user.username}, congrats! Your product has been approved and is currently live on Ecoplug!</p>
+                                    <table width="100%" align="center" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;" >
+                                        <tr>
+                                            <td align="center" style="padding-top:20px;padding-bottom:20px;padding-right:0;padding-left:0;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                                                <table class="mobile-wide" border="0" cellspacing="0" cellpadding="0" role="presentation" style="border-collapse:collapse;" >
+                                                    <tr>
+                                                        <td align="center" class="btn" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;background-color:green;box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);border-radius:3px;" >
+                                                            <a href="https://ecoplug.xyz/products/${new_Product._id}" target="_blank" style="background-color:green;padding-top:14px;padding-bottom:14px;padding-right:30px;padding-left:30px;display:inline-block;color:#FFF;text-decoration:none;border-radius:3px;-webkit-text-size-adjust:none;box-sizing:border-box;border-width:0px;border-style:solid;border-color:green;font-weight:600;font-size:15px;line-height:21px;letter-spacing:0.25px;" >Visit my Product</a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    
+
+                                    <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;" ><b>Cheers,</b>
+                                        <br>The Ecoplug Team!</p>
+
+                              
+
+                                    <table width="100%" style="border-collapse:collapse;" >
+                                        <tr>
+                                            <td height="20" style="font-size:0px;line-height:0px;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td height="20" style="font-size:0px;line-height:0px;border-top-width:1px;border-top-style:solid;border-top-color:#e2e8f0;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p class="small" style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:14px;line-height:21px;" >Want to add another product? Add one<a href="https://ecoplug.xyz/add/"> by clicking here</a>.</p>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>`)
+                        .setText(`Product Approved! | ${product_user.username}`);
+                    await mailersend.send(emailParams);
+
+                    await product.deleteOne();
+
+
+
+                } catch (error) {
+                    admin_discord_webhook.send(`<@710465231779790849>\n\n${error}`);
+                    console.log(error)
+                    res.send(`Successfully approved.`)
+                    return;
+                }
+
+            } else if (req.body.type === "decline") {
+
+                const reason = req.body.reason;
+
+                try {
+
+
+                    const recipients = [new Recipient(product_user.email, product_user.username)];
+
+                    admin_discord_webhook.send(`<@710465231779790849>\n\nDeclined Product #${product._id}`);
+
+                    const emailParams = new EmailParams()
+                        .setFrom("support@ecoplug.xyz")
+                        .setFromName("Ecoplug")
+                        .setRecipients(recipients)
+                        .setSubject(`${product_user.username} |  Product Declined`)
+                        .setHtml(`<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <!--[if !mso]><!-->
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Inter:400,600');
+    </style>
+    <!--<![endif]-->
+
+    <style type="text/css" rel="stylesheet" media="all">
+        @media only screen and (max-width: 640px) {
+
+            .ms-header {
+                display: none !important;
+            }
+            .ms-content {
+                width: 100% !important;
+                border-radius: 0;
+            }
+            .ms-content-body {
+                padding: 30px !important;
+            }
+            .ms-footer {
+                width: 100% !important;
+            }
+            .mobile-wide {
+                width: 100% !important;
+            }
+            .info-lg {
+                padding: 30px;
+            }
+        }
+    </style>
+    <!--[if mso]>
+    <style type="text/css">
+    body { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td * { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td p { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td a { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td span { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td div { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td ul li { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td ol li { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    td blockquote { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    th * { font-family: Arial, Helvetica, sans-serif!important  !important; }
+    </style>
+    <![endif]-->
+</head>
+<body style="font-family:'Inter', Helvetica, Arial, sans-serif; width: 100% !important; height: 100%; margin: 0; padding: 0; -webkit-text-size-adjust: none; background-color: #f4f7fa; color: #4a5566;" >
+
+<div class="preheader" style="display:none !important;visibility:hidden;mso-hide:all;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;" ></div>
+
+<table class="ms-body" width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;background-color
+            <table class="ms-container" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;" >
+                <tr>
+                    <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+        <table class="ms-body" width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;background-color:#f4f7fa;width:100%;margin-top:0;margin-bottom:0;margin-right:0;margin-left:0;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;" >
+    <tr>
+        <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                            <tr>
+                                <td height="40" style="font-size:0px;line-height:0px;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                        <table class="ms-content" width="640" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;width:640px;margin-top:0;margin-bottom:0;margin-right:auto;margin-left:auto;padding-top:0;padding-bottom:0;padding-right:0;padding-left:0;background-color:#FFFFFF;border-radius:6px;box-shadow:0 3px 6px 0 rgba(0,0,0,.05);" >
+                            <tr>
+                                <td class="ms-content-body" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;padding-top:40px;padding-bottom:40px;padding-right:50px;padding-left:50px;" >
+
+                                    <p class="logo" style="margin-right:0;margin-left:0;line-height:28px;font-weight:600;font-size:21px;color:#111111;text-align:center;margin-top:0;margin-bottom:40px;" ><span style="color:#0052e2;font-family:Arial, Helvetica, sans-serif;font-size:30px;vertical-align:bottom;" ><img style="height: 20px; width: 20px;"src="https://ecoplug.xyz/logo.png" />&nbsp;</span>Ecoplug</p>
+
+                                    <h1 style="margin-top:0;color:#111111;font-size:24px;line-height:36px;font-weight:600;margin-bottom:24px;" >Product  Declined :(</h1>
+
+                                    <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;" >Hey ${user.username}, Your product has been sadly declined for <b>${reason}</b>.</p>
+                                    <table width="100%" align="center" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;" >
+                                        <tr>
+                                            <td align="center" style="padding-top:20px;padding-bottom:20px;padding-right:0;padding-left:0;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;" >
+
+                                                <table class="mobile-wide" border="0" cellspacing="0" cellpadding="0" role="presentation" style="border-collapse:collapse;" >
+                                                    <tr>
+                                                        <td align="center" class="btn" style="word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;background-color:green;box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);border-radius:3px;" >
+                                                            <a href="https://ecoplug.xyz/add" target="_blank" style="background-color:red;padding-top:14px;padding-bottom:14px;padding-right:30px;padding-left:30px;display:inline-block;color:#FFF;text-decoration:none;border-radius:3px;-webkit-text-size-adjust:none;box-sizing:border-box;border-width:0px;border-style:solid;border-color:green;font-weight:600;font-size:15px;line-height:21px;letter-spacing:0.25px;" >Add another Product</a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    
+
+                                    <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;" ><b>Cheers,</b>
+                                        <br>The Ecoplug Team!</p>
+
+                              
+
+                                    <table width="100%" style="border-collapse:collapse;" >
+                                        <tr>
+                                            <td height="20" style="font-size:0px;line-height:0px;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td height="20" style="font-size:0px;line-height:0px;border-top-width:1px;border-top-style:solid;border-top-color:#e2e8f0;word-break:break-word;font-family:'Inter', Helvetica, Arial, sans-serif;" >
+                                                &nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <p class="small" style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:14px;line-height:21px;" >Want to add another product? Add one<a href="https://ecoplug.xyz/add/"> by clicking here</a>.</p>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>`)
+                        .setText(`Product Declined :( | ${product_user.username}`);
+                    await mailersend.send(emailParams);
+                    await product.deleteOne();
+
+
+
+
+                } catch (error) {
+                    admin_discord_webhook.send(`<@710465231779790849>\n\n${error}`);
+                    console.log(error)
+                    res.send(`Successfully declined.`)
+                    return;
+                }
+
+
+            }
+
+
+        } else {
+            res.send(`You do not have permission to view this page`)
+        }
+    } catch {
+        return res.send(`Invalid Queue`)
+    }
+});
 
 app.get('/forgot/:token', async function(req, res) {
 
@@ -1066,9 +1940,9 @@ app.get('/forgot/:token', async function(req, res) {
         return renderTemplate(res, req, "auth/forgot.ejs", {
             alert: `Invalid Reset token was provided..`,
         });
-    
+
     } else {
-      
+
         return renderTemplate(res, req, "auth/newpass.ejs", {
             alert: null,
             userId: user._id.toString(),

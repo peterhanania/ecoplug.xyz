@@ -18,10 +18,10 @@ AOS.init();
 };
 
 $("input[type='radio']").change(function() {
-                if ($(this).val() == "other") {
-                    $("#otherAnswer").show();
+                if ($(this).val() == "another") {
+                    $("#otherAnswer").css('opacity', 1);
                 } else {
-                    $("#otherAnswer").hide();
+                    $("#otherAnswer").css('opacity', 0);
                 }
             });
 

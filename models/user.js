@@ -19,6 +19,14 @@ const userSchema = new Schema({
     type: Date,
     required: false
   },
+  disabled: {
+  type: Boolean,
+  default: false
+  },
+  admin: {
+  type: Boolean,
+  default: false
+  },
   profile: {
 
     image: {

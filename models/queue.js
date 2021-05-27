@@ -19,27 +19,64 @@ const userSchema = new Schema({
   product: {
 
   name: {
-
+    type: String,
+    default: null
   },
 
-  title: {
-
+  what_does_it_do:{ 
+    type: String,
+    default: null
   },
 
-  summary: {
+  quantity: {
+    type: String,
+    default: null
+  },
 
+  target_customers: {
+    type: String,
+    default: null
+  },
+
+  link: {
+    type: String,
+    default: null
+  },
+
+  display_adress: {
+    same: {
+    type: String,
+    default: false
+    },
+
+    other:{
+    type: String,
+    default: null
+    },
+  },
+
+  how_are_they_helping: {
+    type: String,
+    default: null
   }, 
+  
+  picture_links: {
+    type: String,
+    default: null
+  },
 
-  description: {
+  categories: {
+    type: Array,
+    default: null
+  }
+
 
   },
 
-  thumbnail: {
-    
+  queue: {
+    type: Number,
+    default: null
   }
-
-  }
-
 });
 
 

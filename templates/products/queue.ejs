@@ -1,4 +1,4 @@
-<%- include("../partials/head", { user, path, title: "Ecoplug - Add Product",  url}) %>
+<%- include("../partials/head", { user, path, title: "Ecoplug - Queue",  url}) %>
 <head>
 	<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
   <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" />
@@ -14,30 +14,13 @@
 <body>
 <div class="container-product">
             <div class="wrap-product">
-                  <div id="step1">
-                   <% if(alert) { %><div class="alert-validate"><%= alert %></div><% } %>
-                  <span class="product-form-title">Add your product</span>
-                  <h1>Hey <%= user.username %>, let me help promote your product. </h1>
-
-                  <div class="information">
-                  <p style="color: red" id="understand"></p>
-                  <div class="custom-control custom-checkbox mb-1">
-                 <input type="checkbox" class="custom-control-input" id="customCheck">
-                 <label class="custom-control-label" for="customCheck"> By adding my product I accept the <a href="/policy">Product Policy</a>.</label>
-                 </div>
-                  <div class="button-div">
-                  <button type="button" id="lets_go">Let's Go</button>
-                  </div>
-                  </div>
-                  </div>
-
-                    <form type="form" method="POST" action="/add">
-                    <div data-aos="fade-left">
-                    <div id="step2">
+                 
+                    <% if(alert) { %><div class="alert-validate"><%= alert %></div><% } %>
+                    <div class="alert-validate"  id="hidden"></div>
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">1-	What’s your product’s name? (Will be displayed on Website)</span>
-                    <textarea class="input" name="name" placeholder="Your Answer" required></textarea>
+                    <textarea class="input" name="name" placeholder="Your Answer"><%= product.product.name %></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -46,7 +29,7 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">2-	What does your product do? (Will be displayed on Website)</span>
-                    <textarea class="input" name="what_does_it_do" placeholder="Your Answer" required></textarea>
+                    <textarea class="input" name="what_does_it_do" placeholder="Your Answer" disabked><%= product.product.what_does_it_do %></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -55,7 +38,7 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">3- How much of your products are available to sell?<span>
-                    <textarea class="input" name="quantity" placeholder="Your Answer" required></textarea>
+                    <textarea class="input" name="quantity" placeholder="Your Answer" disabled><%= product.product.quantity %></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -63,23 +46,14 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">4-	Who are your target customers?<span>
-                    <div style="padding-top: 9px"></div>
-                    <input type="radio" name="target_customers" id="1" value="13-" required/>
-                    <label for="1">Children up to age 12 (13-)</label><br>
-                    <input type="radio" name="target_customers" id="2"  value="13-18" required/>
-                    <label for="2">Teenagers (13-18)</label><br>
-                    <input type="radio" name="target_customers" id="3"  value="18+" required/>
-                    <label for="3">Adults (18+)</label><br>
-                    <input type="radio" name="target_customers" id="4"  value="all" required/>
-                    <label for="4">All Ages</label><br>
-                    <span class="input-line"></span>
+                                     <textarea class="input" name="target_customers" placeholder="Your Answer" disabled><%= product.product.target_customers %></textarea>
                     </div>
                     </div>
 
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">5-	Please provide us a publicly available link showing your Product. (This may be a website/social media link or other public information)<span>
-                    <textarea class="input" name="link" placeholder="Your Answer" required></textarea>
+                    <textarea class="input" name="link" placeholder="Your Answer" disabled><%= product.product.link %></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -87,12 +61,7 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">6-	Would you like us to display your account email adress or another? (to contact customers - Will be also displayed on Site)<span>
-                    <div style="padding-top: 9px"></div>
-                    <input type="radio" name="display_adress" value="same" id="5" required/>
-                    <label for="5">Same</label><br>
-                    <input type="radio" name="display_adress" value="another" id="6" required/>
-                    <label for="6">Another</label><br>
-                    <input style="opacity: 0;" placeholder="Enter other email here" maxlength="32" type="text"  class="input" name="other" id="otherAnswer" />
+                                 <textarea class="input" name="quantity" placeholder="Your Answer" disabled><%= product.product.display_adress.same === "false" ? "Same Adress" : `Not the same adress, ${product.product.display_adress.other} `%></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -100,7 +69,7 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">7-	How are your products helping the environment? What are they made of?<span>
-                    <textarea class="input" name="how_are_they_helping" placeholder="Your Answer" required></textarea>
+                    <textarea class="input" name="how_are_they_helping" placeholder="Your Answer" disabled><%= product.product.how_are_they_helping %></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -108,7 +77,7 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">8-	Please provide us with some picture links of your product.<span>
-                    <textarea class="input" name="picture_links" placeholder="Your Answer" required></textarea>
+                    <textarea class="input" name="picture_links" placeholder="Your Answer" disabled><%= product.product.picture_links %></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -119,32 +88,72 @@
                     <span class="label">9. Product Categories<span>
                     <select name="categories[]" multiple="multiple" class="3col active">
                     <% const list = ["Accessories", "Animal Waste", "Bamboo", "Bin", "Bin Liners", "Biodegradable", "Bioplastic", "Bottles", "Bowls", "Clothing", "Computer", "Computer Accessories", "Cup", "Decking", "Fabric", "Fish", "Floor Mats", "Foil", "Footwear", "Laptop", "Neoprene", "Plates", "Reclaimed Wood", "Recycled", "Reusable", "Rugs", "Steel", "Toilet Tissue", "Toothbrush", "Towel"] %>
-                    <% list.forEach((l)=>{ %>
+                    <%list.forEach((l)=>{ %>
+                    <% if(product.product.categories.includes(l.split(" ").join("_").toLowerCase())) { %>
+                    <option selected value="<%= l.split(" ").join("_").toLowerCase() %>"><%= l %></option>
+                    <% } else { %>
                     <option value="<%= l.split(" ").join("_").toLowerCase() %>"><%= l %></option>
+                    <% } %>
+                    
                     <% }) %>
                     </select>
                     <span class="input-line"></span>
                     </div>
                     </div>
 
-
-                  <button type="submit">Submit</button>
-
-
-
-
-
-
-
+                    <div data-aos="fade-left">
+                    <div class="wrap-input">
+                    <span class="label">REASON OF DECLINE (if declined)<span>
+                    <textarea class="input" name="reason" id="reason" required></textarea>
+                    <span class="input-line"></span>
+                    </div>
+                    </div>
 
 
-                    </div></div></form>
+                  <button id="approve" type="button">Approve</button>
+                  <button id="decline" type="button">Decline</button>
+
+
+
+
+
+
+
+
+
+                    </div>
 
 
 
             </div>
         </div>
 </body>
+<script>
+document.getElementById("approve").onclick = function() {
+ fetch(`/products/queue/<%=product.queue%>`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'approve'})
+        }).then(res => res.text()).then(res => {
+                if (res) {
+  window.location.href = "/products/"
+
+                }
+            })
+};
+document.getElementById("decline").onclick = function() {
+ fetch(`/products/queue/<%=product.queue%>`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'decline', reason: document.getElementById("reason").value })
+        }).then(res => res.text()).then(res => {
+                if (res) {
+  window.location.href = "/products/"
+
+                }
+            })
+};
+</script>
 <script>$('select[multiple]').multiselect({
     columns  : 3,
     search   : true,
@@ -188,7 +197,6 @@
 });</script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js'></script>
-<script src="/js/product_add.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
   AOS.init();
