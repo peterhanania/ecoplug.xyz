@@ -104,6 +104,9 @@ opacity: 1;
   75% {transform: scale(1.03);}
   100% {transform: scale(1);}
 }
+.category:hover{
+  background-color: rgb(58, 57, 57)
+}
 
 .load-text {
   font-family: 'Staatliches', cursive;
