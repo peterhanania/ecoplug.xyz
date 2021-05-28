@@ -188,7 +188,11 @@ body('summary').isLength({
 body('what_does_it_do').isLength({
         min: 50,
         max: 2000
-    }).withMessage('Please provide a description between 50 to 2000 characters'),
+    }).withMessage('Please provide a description between 50 and 2000 characters'),
+body('name').isLength({
+        min: 5,
+        max: 50
+}).withMessage('Please provide a name between 5 and 30 characters'),
 
 async function(req, res) {
 
@@ -328,6 +332,8 @@ async function(req, res) {
 
                 };
 
+            } else if(data.display_adress === "private") {
+              display_adress = "private"
             } else {
                 return renderTemplate(res, req, "products/add.ejs", {
                     alert: `Would you like us to display your account email adress or another?`,
@@ -421,7 +427,11 @@ async function(req, res) {
         let queue = 1;
         const queue_products = await Queue.find();
         if (queue_products && queue_products.length) queue = queue_products.length + 1;
-
+        
+        if(display_adress === "another") display_adress = "another";
+        if(display_adress === "private") display_adress = "private";
+        if(display_adress === "same") display_adress = "same";
+        
 
         try {
 
@@ -439,7 +449,7 @@ async function(req, res) {
                     target_customers: target_customers,
                     link: link,
                     display_adress: {
-                        same: display_adress === "another" ? "false" : "true",
+                        same: display_adress,
                         other: other ? other : null
                     },
   
@@ -451,7 +461,8 @@ async function(req, res) {
                 },
 
 
-                queue: queue
+                queue: queue,
+                added: Date.now()
             });
 
         } catch (error) {
@@ -616,7 +627,7 @@ async function(req, res) {
 </html>
 `)
                 .setText(`Product Added | ${user.username}`);
-            //   await mailersend.send(emailParams);
+             await mailersend.send(emailParams);
         } catch (error) {
             admin_discord_webhook.send(`<@710465231779790849>\n\n${error}`);
             console.log(error)
@@ -1605,6 +1616,8 @@ app.post('/products/queue/:id', checkAuth, async function(req, res) {
 
                         },
 
+                        added: product.added || Date.now(),
+
                         product: {
 
                             name: product.product.name,
@@ -1618,8 +1631,8 @@ app.post('/products/queue/:id', checkAuth, async function(req, res) {
                             link: product.product.link,
 
                             display_adress: {
-                                same: product.product.same,
-                                other: product.product.other ? product.product.other : null
+                                same: product.product.display_adress.same,
+                                other: product.product.display_adress.other ? product.product.display_adress.other : null
                             },
 
                             how_are_they_helping: product.product.how_are_they_helping,
@@ -2022,10 +2035,15 @@ app.get("/logout", function(req, res) {
 
 
 
-app.get("/", async (req, res) => {
+app.get("/",  async(req, res) => {
 
+    const newproducts = await Product.find().sort({$natural: -1 }).limit(6);
+    const popular = await Product.find().sort({views: -1 }).limit(6);
 
-    renderTemplate(res, req, "index.ejs", {});
+    renderTemplate(res, req, "index.ejs", { 
+      newproducts: newproducts,
+      popular: popular
+    });
 
 });
 

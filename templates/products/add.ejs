@@ -37,7 +37,7 @@
                     <div data-aos="fade-left">
                     <div class="wrap-input">
                     <span class="label">1-	What’s your product’s name? (Will be displayed on Website)</span>
-                    <textarea class="input" name="name" placeholder="Your Answer" required></textarea>
+                    <textarea minlength="5" maxlength="50" class="input" name="name" placeholder="Your Answer" required></textarea>
                     <span class="input-line"></span>
                     </div>
                     </div>
@@ -98,6 +98,8 @@
                     <div style="padding-top: 9px"></div>
                     <input type="radio" name="display_adress" value="same" id="5" required/>
                     <label for="5">Same</label><br>
+                    <input type="radio" name="display_adress" value="private" id="23" required/>
+                    <label for="23">Private</label><br>
                     <input type="radio" name="display_adress" value="another" id="6" required/>
                     <label for="6">Another</label><br>
                     <input style="opacity: 0;" placeholder="Enter other email here" maxlength="32" type="text"  class="input" name="other" id="otherAnswer" />

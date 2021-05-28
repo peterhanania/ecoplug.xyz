@@ -82,7 +82,13 @@ const userSchema = new Schema({
   queue: {
     type: Number,
     default: null
+  },
+
+  added: {
+    type: Date,
+    default: Date.now()
   }
+
 });
 
 

@@ -72,7 +72,7 @@ const userSchema = new Schema({
   categories: {
     type: Array,
     default: null
-  }
+  },
 
 
   },
@@ -80,7 +80,17 @@ const userSchema = new Schema({
   views: {
     type: Number,
     default: 0
+  },
+  likes: {
+    type: Number,
+    default: 0
+  },
+
+  added: {
+    type: Date,
+    default: Date.now()
   }
+
 });
 
 
