@@ -178,6 +178,9 @@ app.get("/add", checkAuth, function(req, res) {
 
 });
 
+app.get("/policy", function(req,res){
+  renderTemplate(res,req, "other/policy.ejs")
+})
 
 app.post("/add", 
 checkAuth, 
