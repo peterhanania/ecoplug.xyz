@@ -94,6 +94,11 @@
     display: none;
 }
 
+
+.ms-options-wrap > .ms-options > ul li label {
+   cursor: pointer;
+}
+
 .ms-options-wrap > .ms-options > ul > li.optgroup {
     padding: 5px;
 }

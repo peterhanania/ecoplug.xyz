@@ -1468,7 +1468,7 @@ app.post(
             };
 
             if (req.user) {
-                renderTemplate(res, req, "auth/signup.ejs", {
+                renderTemplate(res, req, "auth/login.ejs", {
                     alert: `You are already logged in as ${req.user.username}!`,
                 });
                 return;
