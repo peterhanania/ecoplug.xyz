@@ -6,6 +6,7 @@
 	 margin: 0;
 	 padding: 0;
 	 box-sizing: inherit;
+   transition: all 200ms ease;
 }
  html {
 	 box-sizing: border-box;
@@ -62,6 +63,7 @@ float: left;
   animation: waves 10s linear infinite;
 }
 
+ 
  
 .home-top .wave:before {
   content:'';
@@ -371,4 +373,74 @@ display: flex;
   100% {
     background-position: 0;
   }
+}
+
+
+
+
+ .pagination\:container {
+	 display: flex;
+	 align-items: center;
+
+}
+ .arrow\:text {
+	 display: block;
+	 vertical-align: middle;
+	 font-size: 13px;
+   cursor: pointer;
+}
+ .pagination\:number {
+	 --size: 32px;
+	 --margin: 6px;
+	 margin: 0 var(--margin);
+	 border-radius: 6px;
+	 background: #2f2f2f;
+	 max-width: auto;
+	 min-width: var(--size);
+	 height: var(--size);
+	 display: flex;
+	 align-items: center;
+	 justify-content: center;
+	 cursor: pointer !important;
+	 padding: 0 6px;
+   user-select: none !important;
+}
+ @media (hover: hover) {
+	 .pagination\:number:hover {
+		 background: #525151;
+     cursor: pointer;
+	}
+}
+ .pagination\:number:active {
+	 background: #525151;
+   cursor: pointer;
+}
+ .pagination\:active {
+	 background: #2f2f2f;
+	 position: relative;
+   cursor: pointer;
+}
+
+.nothing-to-see-here {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    animation: emptyTxtAn 1s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 30px;
+    line-height: 16px;
+    color: #41444a;
+    font-family: var(--font2);
+    padding: 10px 0;
+    top: 50%;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+@keyframes emptyTxtAn {
+    from {
+        opacity: 0;
+    }
 }

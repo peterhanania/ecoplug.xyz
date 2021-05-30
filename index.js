@@ -170,6 +170,160 @@ app.use(async (req, res, next) => {
     }
 });
 
+   const findprods = async () => {
+    let prod = await Product.find().sort({views: -1 })
+    return prod
+};
+
+app.post('/products/', async function(req, res) {
+
+
+ 
+  var tag = req.body.search;
+
+
+  if(tag){
+
+    const all = await findprods();
+
+    prods = await all.filter(prod => {
+        if (prod.product.name.toLowerCase().includes(tag)) return true;
+        else if (prod.product.summary && prod.product.summary.toLowerCase().includes(tag)) return true;
+        else if (prod.product.what_does_it_do.toLowerCase().includes(tag)) return true;
+        else if (prod.product.categories.includes(tag)) return true;
+        else return false;
+    });
+
+      if(!prods || !prods.length || prods.length < 1) {
+      res.redirect('/products/p/1')
+      };
+
+     renderTemplate(res, req, 'products/all.ejs', {
+                    products: prods,
+                    current: null,
+                    pagination: false,
+                    pages: null,
+                })
+
+
+
+
+    return;
+
+  } else return res.redirect('/products/p/1')
+
+
+
+
+    
+   
+})
+
+app.get('/products/', async function(req, res) {
+
+  var perPage = 3
+   var page =  1;
+        
+  let prods = await findprods();
+
+  var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  var tag = new URL(fullUrl).searchParams.get("tag");
+
+
+  if(tag && tag === "new"){
+  await Product.find().sort({$natural: -1})
+        .exec(function(err, products) {
+            Product.estimatedDocumentCount().exec(function(err, count) {
+                if (err) throw err;
+                renderTemplate(res, req, 'products/all.ejs', {
+                    products: products,
+                    current: page,
+                    pagination: false,
+                    pages: Math.ceil(count / perPage)
+                })
+            })
+        })
+
+        return
+  
+  } else if(tag && tag === "popular"){
+  await Product.find().sort({views: -1})
+        .exec(function(err, products) {
+            Product.estimatedDocumentCount().exec(function(err, count) {
+                if (err) throw err;
+                renderTemplate(res, req, 'products/all.ejs', {
+                    products: products,
+                    current: page,
+                    pagination: false,
+                    pages: Math.ceil(count / perPage)
+                })
+            })
+        })
+
+        return;
+
+  } else if(tag){
+
+    const all = await findprods();
+
+    prods = await all.filter(prod => {
+        if (prod.product.name.toLowerCase().includes(tag)) return true;
+        else if (prod.product.summary && prod.product.summary.toLowerCase().includes(tag)) return true;
+        else if (prod.product.what_does_it_do.toLowerCase().includes(tag)) return true;
+        else if (prod.product.categories.includes(tag)) return true;
+        else if(prod._id.includes(tag)) return true;
+        else return false;
+    });
+
+     renderTemplate(res, req, 'products/all.ejs', {
+                    products: prods,
+                    current: null,
+                    pagination: false,
+                    pages: null,
+                })
+
+
+
+
+    return;
+
+  } else if(!tag) return res.redirect('/products/p/1')
+
+  if(!prods || !prods.length || prods.length < 1) {
+      res.redirect('/products/p/1')
+  };
+
+
+    
+   
+})
+
+app.get('/products/p/:page', async function(req, res) {
+    var perPage = 3
+    var page = req.params.page || 1
+
+    await Product
+        .find()
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec(function(err, products) {
+            Product.estimatedDocumentCount().exec(function(err, count) {
+                if (err) throw err;
+                renderTemplate(res, req, 'products/all.ejs', {
+                    products: products,
+                    current: page,
+                    pagination: true,
+                    pages: Math.ceil(count / perPage)
+                })
+            })
+        })
+})
+
+app.get('/products/p', async function(req, res) {
+   res.redirect('/products/p/1')
+})
+
+
 app.get("/add", checkAuth, function(req, res) {
 
     renderTemplate(res, req, "products/add.ejs", {
@@ -810,6 +964,7 @@ app.post("/profile/change_profile_picture", checkAuth, async (req, res, next) =>
 
 
 });
+
 
 app.post("/profile/change_password",
     checkAuth,
@@ -2052,17 +2207,6 @@ app.get("/",  async(req, res) => {
 
 
 
-app.get("/products", async (req, res) => {
-
-    return res.send('The current feature is under development!')
-
-});
-
-
-app.post("/products", async (req, res) => {
-    return res.send('The current feature is under development!')
-
-});
 
 
 app.get("*", async (req, res) => {

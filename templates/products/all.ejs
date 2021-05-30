@@ -1,0 +1,84 @@
+<%- include("../partials/head", { user, path, title: "Ecoplug - Home",  url}) %>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+	<link href="https://ecoplug.xyz/css/main.css" type="text/css" rel="stylesheet">
+	<link href="https://ecoplug.xyz/css/tailwind.css" type="text/css" rel="stylesheet">
+  <link href="https://ecoplug.xyz/css/tailwind2.css" type="text/css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+	<div class="home mt-20">
+  <div class="grid grid-cols-1 gap-10 pt-8 pb-12 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 1xl:gric-cols-3 2xl:grid-cols-4">
+  <% if (products && products.length && products.length > 0) { %>
+  <% for(let newproduct of products) { %>
+  <div data-aos="zoom-in">
+	<div class="transition duration-200 ease-in-out transform rounded-lg lg:hover:scale-105 h-full flex"><div class="rounded-lg bg-template-body w-full" style="opacity: 1; transform: none;"><a class="transition duration-200 ease-in-out transform rounded-lg bg-template-body lg:hover:scale-105" href="/products/<%= newproduct._id %>"><div class="flex flex-col justify-between h-full overflow-hidden text-white rounded-lg"><div style="background-color: #2f2f2f !important;"class="flex flex-col justify-between h-full px-4 py-5 sm:p-6"><div lass="flex"><div style="padding: 8px; border-radius: 4px; background-color: #222 !important" class="flex flex-col overflow-auto break-words opacity-95"><h2 class="text-2xl font-bold"><%= newproduct.product.name %></h2><p class="mt-1 text-on-template"><%= newproduct.product.summary %></p></div></div><ul class="flex mt-8 -mx-1 space-x-2"><% newproduct.product.categories.forEach ((category)=> { %><a style="background-color: #222" class="px-2 py-1 text-xs font-medium leading-5 whitespace-no-wrap transition rounded-md hover:bg-opacity-75 opacity-95 text-on-tag-template bg-tag-template-body transition duration-200 ease-in-out transform rounded-lg bg-template-body lg:hover:scale-105" href="/products?tag=<%=category%>"><%= category %></a><% }) %></ul></div><div style="background-color: #383737" class="flex items-center justify-between px-4 py-5 -mx-4 flex-nowrap bg-template-footer sm:p-6"><div class="flex items-center px-4"><div class="flex-shrink-0"><a href="/users/<%=newproduct.user.id%>"><div class="relative transform hover:scale-110 transition duration-200 ease-in-out"></div></a></div><a href="/users/<%=newproduct.user.id%>"><div class="ml-4 overflow-auto opacity-95"><h3 style="cursor: pointer !important"  class="text-lg font-medium leading-6 text-white truncate"><%= newproduct.user.username %></h3><p class="text-sm leading-5 truncate text-template-discriminator"><span><%= newproduct.added ? moment(newproduct.added).fromNow():"28/05/2021"%></span></p></div></a></div><ul class="flex items-center justify-end pr-4 xl:flex-col md:items-start 1xl:items-center 1xl:flex-row "><li class="flex items-center text-sm font-medium transition duration-200 ease-in-out transform rounded-lg lg:hover:scale-105" style="cursor: pointer !important" ><i class="mr-2 fas fa-eye text-template-250 "></i><span class="font-semibold text-template-200"><%=newproduct.views || 0 %></span></li><div class="mx-3 text-discord-200 xl:hidden 1xl:flex">|</div><li style="cursor: pointer !important" class="flex items-center text-sm font-medium transition duration-200 ease-in-out transform rounded-lg lg:hover:scale-105"><i class="mr-2 fas fa-heart text-template-250"></i><span class="font-semibold text-template-200"><%=newproduct.likes || 0 %></span></li></ul></div></div></a></div></div></div>
+  <% } %>
+
+<% if(pagination) { %>
+<div class="pagination:container">
+  <%var i = (Number(current) > 5 ? Number(current) - 4 : 1) %>
+
+   <% if (current == 1) { %>
+    <div class="pagination:number arrow"><a class="disabled">
+		<svg height="18" width="18">
+		<use xlink:href="#left"></use></svg></a>
+	</div>
+   <% } else { %>
+    <a href="/products/p/1">  	<div class="pagination:number arrow">
+		<svg height="18" width="18">
+		<use xlink:href="#left"></use></svg>
+	</div></a>
+<% } %>
+                    
+  <%if (i !== 1) { %>
+	<div class="pagination:number">
+		...
+	</div><%} %>
+  <%for (; i <= (Number(current) + 4) && i <= pages; i++) { %><%if (i == current) { %>
+	<div class="pagination:number pagination:active">
+		<%= i %>
+	</div><%} else { %>
+
+		<a href="/products/p/<%= i %>">	<div class="pagination:number"><%= i %></div></a>
+<%} %><%if (i == Number(current) + 4 && i < pages) { %>
+	<div class="pagination:number">
+		...
+	</div><%} %><%} %><% if (current == pages) { %>
+    <div class="pagination:number arrow"><a class="disabled">
+		<svg height="18" width="18">
+		<use xlink:href="#right"></use></svg></a>
+	</div>
+   <% } else { %>
+    <a href="/products/p/<%=pages%>">  	<div class="pagination:number arrow">
+		<svg height="18" width="18">
+		<use xlink:href="#right"></use></svg>
+	</div></a>
+<% } %>
+</div><svg class="hide">
+<symbol fill="none" id="left" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+	<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</symbol>
+<symbol fill="none" id="right" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+	<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</symbol></svg>
+<% } %>
+
+
+
+
+  <% } else { %>
+  <div class="nothing-to-see-here"> Nothing to see here</div>
+  <% } %>
+  </div>
+	</div>
+	<div style="padding-top: 20px"></div>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'>
+	</script> 
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+  AOS.init();
+</script>
+</body>
+<%- include("../partials/footer.ejs") %>
