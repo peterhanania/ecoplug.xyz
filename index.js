@@ -195,7 +195,7 @@ app.post('/products/', async function(req, res) {
     });
 
       if(!prods || !prods.length || prods.length < 1) {
-      res.redirect('/products/p/1')
+     return res.redirect('/products/p/1')
       };
 
      renderTemplate(res, req, 'products/all.ejs', {
